@@ -1,0 +1,67 @@
+
+
+<mat-card>
+    <p>product-traverse works! ({{ product_list.length }}) products.</p>
+    <!-- [formControl]="myControl"  -->
+    <!-- [disabled]="!product.active"  -->
+
+    <form [formGroup]="stateForm">
+
+        <mat-label>Phrase Parts</mat-label>
+        <mat-chip-grid class="example-chip"
+            #chipGrid 
+            cdkDropList 
+            cdkDropListOrientation="horizontal" 
+            (cdkDropListDropped)="dropProductChip($event)"
+            aria-label="Enter keywords" >
+
+            <mat-chip-row class="example-box"
+            cdkDrag *ngFor="let product of product_phrase" (removed)="removeProductChip(product)">
+                {{ product.name }}
+                <span *ngIf="!product.active">
+                    <button matChipTrailingIcon (click)="removeProductChip(product)" aria-label="Delete completely">
+                        <mat-icon>block</mat-icon>
+                    </button>
+                    <mat-button-toggle-group name="fontStyle" aria-label="Font Style" multiple>
+                        <mat-button-toggle value="bold">.n</mat-button-toggle>
+                        <mat-button-toggle value="italic">.v</mat-button-toggle>
+                        <mat-button-toggle value="underline">.adj</mat-button-toggle>
+                    </mat-button-toggle-group>
+                </span>
+                <button matChipRemove aria-label="'remove ' + product">
+                    <mat-icon>cancel</mat-icon>
+                </button>
+
+                
+            </mat-chip-row>
+        </mat-chip-grid>
+        <!-- [formControl]="productInputControl" formControlName="stateGroup" required  -->
+        <mat-form-field appearance="fill">
+            <mat-label>Choose Word</mat-label>
+            <input type="text"
+                    matInput
+                    #productInput 
+                    [matChipInputFor]="chipGrid"
+                    [formControl]="productInputControl"
+                    [matAutocomplete]="autoGroup" 
+                    (click)="getCaretPos($event)" 
+                    (keyup)="getCaretPos($event)"
+                    (matChipInputTokenEnd)="addProductChip($event)"
+                    [matChipInputSeparatorKeyCodes]="separatorKeysCodes">
+            <mat-autocomplete #autoGroup="matAutocomplete" (optionSelected)="selected($event)">
+                <mat-optgroup *ngFor="let group of stateGroupOptions | async" [label]="group.letter">
+                    <mat-option *ngFor="let product of group.names" [value]="product">
+                        {{ product.name }}
+                    </mat-option>
+                </mat-optgroup>
+            </mat-autocomplete>
+        </mat-form-field>
+    </form>
+
+
+</mat-card>
+
+<mat-card *ngIf="output.state" role="alert">
+    <div><div class="card-label">{{ output.text }}</div></div>
+</mat-card>
+

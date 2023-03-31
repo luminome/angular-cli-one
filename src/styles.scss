@@ -1,0 +1,259 @@
+@use 'sass:map';
+@use '@angular/material' as mat;
+@include mat.core();
+
+$my-primary: mat.define-palette(mat.$gray-palette);
+$my-accent: mat.define-palette(mat.$pink-palette);
+
+$my-theme: mat.define-light-theme((
+ color: (
+   primary: $my-primary,
+   accent: $my-accent,
+ ),
+ typography: mat.define-typography-config(),
+ density: 0,
+));
+
+@include mat.all-component-themes($my-theme);
+
+
+
+html,
+body {
+  height: 100%;
+}
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+.table-container{
+  max-height: 200px !important;
+  overflow: auto;
+  margin-bottom: 10px;
+}
+
+.create-form-container{
+  margin:10px 0;
+}
+
+.app-message-container{
+  margin:10px 0;
+}
+
+#module-window{
+  margin:10px 0;
+}
+
+.mdc-card, mat-card{
+  display: flex;
+  flex-direction: row !important;
+  flex-wrap: wrap;
+  align-items: left;
+  padding: 6px 10px;
+  font-size: 12px;
+  border-radius: 1px !important;
+  box-sizing: border-box;
+}
+
+
+.card-label{
+  display: block;
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
+  -ms-transform: translateY(-50%);
+  -moz-transform: translateY(-50%);
+  -webkit-transform: translateY(-50%);
+  -o-transform: translateY(-50%);
+}
+
+
+
+
+.shrink-2x {
+  transform: scale(0.75) !important;
+  font-size:24px !important;
+}
+
+.mat-mdc-icon-button, .mdc-switch{
+  transform: scale(0.75) !important;
+
+
+// .mat-mdc-button-touch-target {
+//   line-height:1em !important;
+//   font-size:24px !important;
+//   /* transform: scale(0.75) !important;
+//    */
+// }
+
+}
+
+.mdc-icon-button, .mat-mdc-button-touch-target  {
+  transform: scale(0.75) !important;
+  // font-size: 24px;
+  padding: 0 !important;
+  width: auto !important;
+  height: 1em !important;
+  /* width: 48px; */
+  /* height: 48px; */
+  /* padding: 12px; */
+}
+
+
+.mdc-data-table__row{
+  height:auto !important;
+}
+
+// $my-primary: mat.define-palette($base-theme, 100);
+// $my-app-primary: mat-palette($theme);
+// $my-app-accent:  mat-palette($mat-pink, 500, 900, A100);
+// $my-app-warn:    mat-palette($mat-deep-orange);
+// $my-app-theme: mat-light-theme($my-app-primary, $my-app-accent, $my-app-warn);
+// @include angular-material-theme($my-app-theme);
+
+// .alternate-theme {
+//   $alternate-primary: mat-palette($mat-light-blue);
+//   $alternate-accent:  mat-palette($mat-yellow, 400);
+//   $alternate-theme: mat-light-theme($alternate-primary, $alternate-accent);
+//   @include angular-material-theme($alternate-theme);
+// }
+
+
+// @use '@angular/material' as mat;
+// // // @use '/src/assets/css/theme.css' as ext;
+// @include mat.core();
+
+
+
+// $my-primary: mat.define-palette(mat.$indigo-palette, 100);
+// $my-accent: mat.define-palette(mat.$pink-palette, 100);//, A200, A100, A400);
+
+// $my-theme: mat.define-light-theme((
+//  color: (
+//    primary: $my-primary,
+//    accent: $my-accent,
+//  ),
+//  typography: mat.define-typography-config(),
+//  density: 0,
+// ));
+
+// @include mat.all-component-themes($my-theme);
+
+
+
+// /* You can add global styles to this file, and also import other style files */
+
+// @use 'sass:map';
+// @use '@angular/material/prebuilt-themes/deeppurple-amber.css';
+// @use '@angular/material' as mat;
+// @mixin color($theme){
+  
+//   // Get the color config from the theme.
+//   $color-config: mat.get-color-config($theme);
+
+//   // Get the primary color palette from the color-config.
+//   $primary-palette: mat.get($color-config, 'primary');
+
+//   .cdk-row:hover {
+//     background-color: red !important;//mat.get-color-from-palette($primary-palette, 800);
+//   }
+
+//   mat-hint {
+//     color: blue; //mat.get-color-from-palette($primary-palette, 800);
+//   }
+  
+
+// }
+
+// body{
+//   font-family: var(--mdc-typography-body2-font-family, var(--mdc-typography-font-family, Roboto, sans-serif));
+//   padding:0;
+//   margin:0;
+// }
+
+// // mat-hint {
+// //   //color: blue; //mat.get-color-from-palette($primary-palette, 800);
+// // }
+
+// .mdc-card, mat-card{
+//   display: flex;
+//   flex-direction: row !important;
+//   flex-wrap: wrap;
+//   align-items: left;
+//   padding: 6px 10px;
+//   font-size: 12px;
+//   border-radius: 1px !important;
+//   box-sizing: border-box;
+// }
+
+// .table-container{
+//   max-height: 500px !important;
+//   overflow: auto;
+//   margin-bottom: 10px;
+// }
+
+// .create-form-container{
+//   margin:10px 0;
+// }
+
+// .app-message-container{
+//   margin:10px 0;
+// }
+
+// #module-window{
+//   margin:10px 0;
+// }
+
+// // .mdc-card > div{
+// //   display: table-cell;
+// //   border: 1px red dotted;
+// //   flex: flex-shrink;
+// //   vertical-align: middle;
+// // }
+
+
+// // .mdc-button {
+// //   padding: 0 6px 0 6px;
+// //   margin: 6px 8px 6px 8px;
+// //   min-width: 88px;
+// //   border-radius: 3px;
+// //   font-size: 14px;
+// //   text-align: center;
+// //   text-transform: uppercase;
+// //   text-decoration:none;
+// //   border: none;
+// //   outline: none;
+// // }
+
+// // .mat-icon {
+// //   font-size: 50px;
+// // }
+
+// // mat-icon, button {
+// //   font-size: 20px;
+// // }
+
+// // .mat-mdc-header-row, .mat-mdc-row, .mat-mdc-cell {
+// //   max-height: 24px !important;
+// //   padding:0;
+// //   margin:0;
+// // }
+
+// // tr.mat-mdc-row{
+// //   height: 10px !important;
+// // }
+
+// // button.mat-mdc-icon-button {
+// //   mat-icon.mat-icon, span.mat-mdc-button-persistent-ripple, span.mat-mdc-focus-indicator, span.mat-mdc-button-ripple, span.mat-mdc-button-touch-target {
+// //     max-width: 24px;
+// //     max-height: 24px;
+// //     position:absolute;
+// //   }
+// //   width: 24px;
+// //   height: 24px;
+// //   max-width: 24px;
+// //   max-height: 24px;
+// //   padding:0;
+// //   margin:0;
+// // }

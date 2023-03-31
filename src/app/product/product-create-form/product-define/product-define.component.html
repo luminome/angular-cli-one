@@ -1,0 +1,95 @@
+<!-- WHAT {{ message }} -->
+<!-- [(ngModel)]="selectedPartsOfSpeech"  -->
+<form class="form" [formGroup]="productDefineForm" (ngSubmit)="onSubmit()" (keydown.enter)="$event.preventDefault()">
+    <mat-card>
+        <mat-button-toggle-group *ngIf="product !== null" formControlName="posSelect" aria-label="Font Style" #group="matButtonToggleGroup" (change)="formSelectPartOfSpeech($event)" multiple>
+            <mat-button-toggle 
+            *ngFor="let pos of partsOfSpeech" 
+            matTooltip="{{pos.txt}}" 
+            [value]="pos">.{{pos.val}} 
+            </mat-button-toggle>
+        </mat-button-toggle-group>
+        <!--   -->
+        <!-- <div>
+        <button mat-button class="delete" aria-label="Delete completely" (click)="formAddMeaning()">
+            <mat-icon color="primary">add</mat-icon> Add Meaning
+        </button>
+        </div> -->
+
+    </mat-card>
+    <div *ngIf="product !== null">
+        <div class="top-def" *ngFor="let d = index; let defx of product.def">
+
+            <h1>{{d+1}}.{{defx.word}}</h1>
+            <div class="meaning" *ngFor="let meaning of defx.meanings">
+                {{ meaning.partOfSpeech.txt }}(.{{ meaning.partOfSpeech.val }})
+
+
+                <mat-list>
+                    <div mat-list-item class="def" *ngFor="let i = index; let definition of meaning.definitions">
+
+                        <!-- <a mat-list-item [routerLink]="['/detail']">
+                            <span matLine>Title</span>
+                            <button mat-icon-button (click)="onAdd($event)">
+                            <mat-icon>add</mat-icon>
+                        </button>
+                            <button mat-icon-button (click)="onRemove($event)">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                        </a> -->
+
+                        <button mat-icon-button class="shrink-2x" (click)="formADeleteDefinition(meaning, definition)" aria-label="Delete completely">
+                            <mat-icon matListItemIcon>delete</mat-icon>
+                        </button>
+                        <button mat-icon-button class="shrink-2x" (click)="formADeleteDefinition(meaning, definition)" aria-label="Delete completely">
+                            <mat-icon matListItemIcon>edit</mat-icon>
+                        </button>
+                        <div class="def-body">
+                            <div matListItemTitle>{{ definition.definition }}</div>
+                            <div *ngIf="definition.example" matListItemLine>{{ definition.example }}</div>
+                            <div *ngIf="definition.synonyms" matListItemLine>{{ definition.synonyms }}</div>
+                            <div *ngIf="definition.antonymns" matListItemLine>{{ definition.antonymns }}</div>
+                        </div>
+                    </div>
+                </mat-list>
+
+                <div *ngIf="meaning.synonyms" matListItemLine>{{ meaning.synonyms }}</div>
+                <div *ngIf="meaning.antonymns" matListItemLine>{{ meaning.antonymns }}</div>
+<!-- 
+                <div *ngFor="let defi of meaning.definitions">
+                    {{ defi.definition }}
+                    <button mat-icon-button class="delete" (click)="formADeleteDefinition(meaning, defi)" aria-label="Delete completely">
+                        <mat-icon color="warn">delete_forever</mat-icon>
+                    </button>
+                </div> -->
+            </div>
+            <mat-divider></mat-divider>
+            
+        </div>
+    </div>
+
+    
+</form>
+
+
+<!-- 
+<mat-card *ngIf="error" role="alert">
+
+        <div><div class="card-label"><strong>Warning! </strong> {{ errorMessage }}</div></div>
+    </mat-card>
+
+<section>
+    <div>
+        <mat-form-field appearance="fill">
+            <mat-label>Name</mat-label>
+            <input matInput required formControlName="name" (change)="formFieldChanged($event)">
+            <mat-hint>Language part</mat-hint>
+        </mat-form-field>
+    </div>
+    <div *ngIf="formState == 'new'">
+        <mat-form-field appearance="fill">
+            <mat-label>Meaning</mat-label>
+            <input matInput formControlName="meaning" (change)="formFieldChanged($event)">
+            <mat-hint>Meaning of word</mat-hint>
+        </mat-form-field>
+    </div> -->
