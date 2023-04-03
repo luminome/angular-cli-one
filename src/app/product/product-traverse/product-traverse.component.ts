@@ -2,7 +2,8 @@ import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { Component, OnInit, AfterContentInit, ElementRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormControl, Validators } from '@angular/forms';
 import { IProduct, Product } from 'src/app/entities/product/product.model';
-import { InventoryService } from "src/app/shared/inventory.service";
+import { ProductService } from 'src/app/entities/product/product.service';
+
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { TextService } from "src/app/shared/text.service";
 import { Subscription } from 'rxjs';
@@ -55,20 +56,17 @@ export class ProductTraverseComponent implements OnInit, AfterContentInit {
 
   @ViewChild('productInput') productInput: ElementRef<HTMLInputElement> | any;
 
-  constructor(private _formBuilder: FormBuilder,
-    private products: InventoryService,
-    private logger: TextService) {
+  constructor(
+    private _formBuilder: FormBuilder,
+    private logger: TextService,
+    protected productService: ProductService) {
   }
-
-    // name: new FormControl(this.name, Validators.required),
 
   stateForm = this._formBuilder.group({
     stateGroup: [null] //, { validators:[ Validators.required, Validators.minLength(4)]}],
   });
 
-
   // formControl = new FormControl(['angular']);
-
 
   addProductChip(event: MatChipInputEvent): void {
     const value = event.value;    
@@ -88,14 +86,6 @@ export class ProductTraverseComponent implements OnInit, AfterContentInit {
       if(in_phrase.length === 0) this.product_phrase.push(selected_product);
     }
 
-    // // Clear the input value
-    // this.productInput.nativeElement.value = '';
-    // this.productInput.select.value = null;
-    // event.chipInput!.clear();
-    // this.stateForm.controls['stateGroup'].selected = null;
-    // this.productInputControl.setValue(null);
-    // this.stateGroupOptions = this.stateGroups;
-    // this.stateForm.get('stateGroup').setValue('');
   }
 
   removeProductChip(product: IProduct): void {
@@ -115,43 +105,9 @@ export class ProductTraverseComponent implements OnInit, AfterContentInit {
     // this.stateForm.controls['stateGroup'].setValue('');
   }
 
-
-
-  // removeProduct(product: IProduct) {
-  //   const index = this.product_phrase.indexOf(product);
-  //   if (index >= 0) {
-  //     this.product_phrase.splice(index, 1);
-  //   }
-  // }
-
-  // addProduct(event: MatChipInputEvent): void {
-  //   // const value = (event.value);//.trim();
-
-  //   // // Add our keyword
-  //   // if (value) {
-  //   //   this.product_list.push(event.value);
-  //   // }
-
-  //   // // Clear the input value
-  //   // event.chipInput!.clear();
-  // }
-
-  // stateForm.control = ({
-  //   stateGroup: new FormControl('stateGroup', Validators.required)
-  // });
-
   dropProductChip(event: CdkDragDrop<IProduct[]> | any) {
     moveItemInArray(this.product_phrase, event.previousIndex, event.currentIndex);
   }
-
-
-
-
-
-
-
-
-
 
   caretPos: number = 0;
 
@@ -162,8 +118,6 @@ export class ProductTraverseComponent implements OnInit, AfterContentInit {
        this.output.text = `POS:${this.caretPos}`;
     }
   }
-
-
 
   //process asnyc and deferred load.
   updateProducts(products: IProduct[] | any): void {
@@ -177,12 +131,6 @@ export class ProductTraverseComponent implements OnInit, AfterContentInit {
       map(value => this._filterGroup(value || null))
     );
   }
-
-
-
-  // autoChange(event: any, field: any = null): void {
-  //   this.logger.ez.set_text(JSON.stringify(this.stateGroups, null, '\t'), true);
-  // }
 
   //get products into form-input state.
   populateProductsAlphabetized(): void{
@@ -206,73 +154,20 @@ export class ProductTraverseComponent implements OnInit, AfterContentInit {
     }
   }
 
-
-
-
-
-
-    // constructor(private fb: FormBuilder) {
-    //   this.control = fb.control({value: 'my val', disabled: true});
-    // }
-    
-
-
   validateMod(val: any):void{
     //this.logger.ez.set_text(JSON.stringify(this.stateGroups, null, '\t'), true);
   }
 
   ngOnInit(): void {
     this.logger.ez.set_text('ngOnInit product_traverse_init', true);
-    this.subscription = this.products.currentMessage.subscribe((products: IProduct[] | any) => this.updateProducts(products));
-    // this.stateGroupOptions = this.stateForm.get('stateGroup')!.valueChanges.pipe(
-    // this.stateGroupOptions = this.productInputControl.valueChanges.pipe(
-    //   startWith(null),
-    //   map(value => this._filterGroup(value || null))
-    // );
-
-
-    //this.stateForm.group.control({value: 'stateGroup', disabled: true});
-
-    // this._formBuilder['stateGroup'] = this.autoControl({value: 'stateGroup', disabled: true});
-
-    // this._formBuilder.control({value: 'stateGroup', disabled: true});
-
-    // this.autoControl
-    // this._formBuilder.control({value: 'stateGroup', error: true});
-    // this._formBuilder.control.setErrors({'nomatch': true});
-    // this.productForm.controls['brand'].setErrors({'nomatch': true});
-    //this.autoControl.valueChanges.subscribe((val:any) => this.validateMod(val));
-
-    // this.productForm.get("name").valueChanges.subscribe((val:any) => {
-    //   if (val) {
-    //     this.now = new Date();
-    //     // this.logger.ez.set_text('date changed.', true);
-    //     this.productForm.controls['date'].setValue(this.now);
-    //   }
-    // });
-    //this.autoControl.valueChanges(val)
-      // this.logger.ez.set_text(JSON.stringify(this.stateGroups, null, '\t'), true)
-  //   this.myControl = new FormControl();      
-  //   this.myControl.valueChanges
-  // .pipe(
-  //   debounceTime(500),
-  //   distinctUntilChanged(),
-  //   takeUntil(this.ngUnsubscribe) // optional but recommended 
-  // )
-  // .subscribe(searchPhrase => check if empty);
-    
-    // _formBuilder.FormControl('this.name')
-      
+    this.subscription = this.productService.inventory.subscribe((products: IProduct[] | any) => this.updateProducts(products));
   }
 
   ngAfterContentInit(){
-    // this.stateForm.controls['stateGroup'].setValue('');
-    // this.stateForm.controls['stateGroup'].setErrors({'nomatch': true});
     this.logger.ez.set_text('ngAfterContentInit product_traverse_post_init', true);
   }
 
   private _filterGroup(value: IProduct | any): StateGroup[] {
-    //const check_value = value.name ? value : 
     console.log('_filterGroup', `"${value}"`);
 
     if (value !== null) {
@@ -280,37 +175,8 @@ export class ProductTraverseComponent implements OnInit, AfterContentInit {
         .map(group => ({letter: group.letter, names: _filter(group.names, value )}))
         .filter(group => group.names.length > 0);
 
-    // if (value) {
-    //   let kva: any;
-
-    //   if(value.indexOf(' ') !== -1){
-    //     const rk = value.split(' ');
-    //     kva = rk[rk.length-1];
-    //   }else{
-    //     kva = value;
-    //   }
-
-    //   const grp = this.stateGroups
-    //     .map(group => ({letter: group.letter, names: _filter(group.names, kva )}))
-    //     .filter(group => group.names.length > 0);
-      
       this.logger.ez.set_text(JSON.stringify(grp, null, '\t'), true);
 
-      // if(grp.length === 1 && grp[0]['names'].length === 1){
-      //   const the_product = grp[0]['names'][0]; //this.product_list.filter(p => p.name === grp[0]['names'][0])[0];
-
-      //   this.logger.ez.set_text(grp[0]['names'][0], true);
-
-      //   this.product_phrase.push(the_product);
-      //   //this.inputControl.setValue('');
-
-      //   this.stateForm.controls['stateGroup'].setValue('');
-
-      //   //this.stateForm.controls['stateGroup'].setValue(grp[0]['names'][0]);
-      // }
-
-
-      
       return grp;
     }
     

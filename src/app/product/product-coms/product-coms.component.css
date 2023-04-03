@@ -1,0 +1,21 @@
+.mdc-card {
+    display: flex;
+    flex-direction: row !important;
+    flex-wrap: wrap;
+    align-items: left;
+    padding:4px;
+    margin-bottom:8px;
+    /* border-radius: 1px !important; */
+    box-sizing: border-box;
+}
+
+.coms-text{
+    padding-left: 4px;
+    opacity:0.8;
+}
+
+.coms-subtext{
+    font-size:0.75em;
+    padding-left: 4px;
+    opacity:0.5;
+}

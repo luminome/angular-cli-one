@@ -110,6 +110,28 @@ app.post("/api/products", function (req, res) {
     }
 });
 
+
+/*  "/api/modify/:id"
+ *   POST: modifies product and definition by id
+ */
+app.post("/api/modify/:id", function (req, res) {
+    var product = req.body;
+    const def_entry = {'name':product.name,'definition':product.def};
+    delete product.def;
+    product._id = new ObjectId(req.params.id);
+    products_collection.replaceOne({_id: new ObjectId(req.params.id)}, product)
+    .then(response => {
+        def_entry._id = new ObjectId(req.params.id);
+        return {product:response, definition:products_defs_collection.replaceOne({_id: new ObjectId(req.params.id)}, def_entry)}
+    })
+    .then(response => {
+        res.status(200).json(response.product);
+    });
+});
+
+
+
+
 /*  "/api/products/:id"
  *   POST: updates product by id
  */
@@ -121,7 +143,6 @@ app.post("/api/products/:id", function (req, res) {
         res.status(200).json(response);
     });
 });
-
 
 /*  "/api/lookup/:word"
  *   GET: word definition from api
@@ -153,9 +174,9 @@ app.delete("/api/products/:id", function (req, res) {
     if (req.params.id.length > 24 || req.params.id.length < 24) {
         manageError(res, "Invalid product id", "ID must be a single String of 12 bytes or a string of 24 hex characters.", 400);
     } else {
-        products_defs_collection.deleteOne({ _id: new ObjectId(req.params.id) })
+        products_collection.deleteOne({ _id: new ObjectId(req.params.id) })
         .then(response => {
-            return products_collection.deleteOne({ _id: new ObjectId(req.params.id) })
+            return products_defs_collection.deleteOne({ _id: new ObjectId(req.params.id) })
         })
         .then(response => {
             res.status(200).json(response);

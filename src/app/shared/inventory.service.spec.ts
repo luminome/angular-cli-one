@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 
-import { InventoryService } from './inventory.service';
+import { InventoryService } from './coms.service';
 
 describe('StatusService', () => {
   let service: InventoryService;

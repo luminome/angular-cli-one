@@ -1,12 +1,13 @@
-section {
+
+
+.fields{
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
   align-items: left;
 }
 
-section div{
-  /* border: 1px red dotted; */
+.fields div{
   flex: flex-basis;
 }
 
@@ -37,4 +38,20 @@ section div{
 
 .card-label.error{
   text-transform: uppercase;
+}
+
+.card-label.notify{
+  text-transform: none;
+}
+
+
+.mdc-card, .mat-mdc-card {
+  display: flex;
+  flex-direction: row !important;
+  flex-wrap: wrap;
+  align-items: left;
+  padding:4px;
+  margin-bottom:8px;
+  /* border-radius: 1px !important; */
+  box-sizing: border-box;
 }

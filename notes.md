@@ -1,3 +1,10 @@
+concept was lexically informed tagging
+word records was motivated by nested lexically informed tagging
+
+
+
+
+
 ng g c product/product-create-form --module=app.module.ts 
 ng g c is equivalent to ng generate component
 
@@ -27,6 +34,12 @@ Object.entries(m).map(([key, val]) =>
 )
 return [...new Set([...a])];
 }
+
+https://medium.com/allenhwkim/angular-watch-for-element-changes-made-to-dom-tree-bb92062fe5e9
+
+
+
+ng g c product/product-coms --module=app.module.ts
 
 
 

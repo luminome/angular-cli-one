@@ -1,0 +1,14 @@
+<section *ngIf="coms_obj.visible">
+    <mat-card  role="alert">
+        <div>
+            <button mat-icon-button class="delete" (click)="hideComs()" aria-label="coms_obj.text">
+                <mat-icon color="primary">block</mat-icon>
+            </button>
+        </div>
+        <div><mat-icon *ngIf="coms_obj.icon" color="primary">{{ coms_obj.icon }}</mat-icon></div>
+        <div>
+            <div class="coms-text" *ngFor="let i = index; let text of coms_obj.text">{{ text }}</div>
+            <div class="coms-subtext">{{ coms_obj.delta }} StateManager:{{ coms_obj.state }}</div>
+        </div>
+    </mat-card>
+</section>

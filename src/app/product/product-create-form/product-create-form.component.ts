@@ -1,13 +1,11 @@
-import { Component, OnInit, OnDestroy, OnChanges, Output, Input, EventEmitter } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { FormBuilder, FormControl, Validators } from '@angular/forms';
 import { ProductService } from 'src/app/entities/product/product.service';
 import { IProduct, Product } from 'src/app/entities/product/product.model';
-import { InventoryService } from "src/app/shared/inventory.service";
 import { TextService } from "src/app/shared/text.service";
+import { CommunicationsService } from 'src/app/shared/coms.service';
 import { Subscription } from 'rxjs';
-import { ProductDefineComponent } from './product-define/product-define.component';
-import { TopDefinition } from 'src/app/entities/meaning/meaning.model';
-
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 export const PartsOfSpeech = [
   {val:'n', txt:'Noun', id:0},
@@ -21,19 +19,11 @@ export const PartsOfSpeech = [
   {val:'num', txt:'Numeral', id:8},
 ];
 
-export const auxPartsOfSpeech = {
-  'noun': {val:'n', txt:'Noun', id:0},
-  'verb': {val:'v', txt:'Verb', id:1},
-  'adverb': {val:'adv', txt:'Adverb', id:2},
-  'adjective': {val:'adj', txt:'Adjective', id:3},
-  'conjunction': {val:'c', txt:'Conjunction', id:4},
-  'interjection': {val:'int', txt:'Interjection', id:5},
-  'pronoun': {val:'pron', txt:'Pronoun', id:6},
-  'preposition': {val:'prep', txt:'Preposition', id:7}
+export const ProductFieldNames = {
+  'TopDefinition': ['meanings','meaning'],
+  'Meaning': ['definitions','definition','synonyms','antonyms'],
+  'Definition' : ['definition','example','synonyms','antonyms']
 }
-
-
-
 
 @Component({
   selector: 'app-product-create-form',
@@ -44,128 +34,156 @@ export class ProductCreateFormComponent implements OnInit, OnDestroy {
   public now = new Date();
   public parts_of_speech_list: any[] = PartsOfSpeech;
 
-
-  // public parts_of_speech_list: any[] = [
-  //   {val:'n', txt:'Noun'},
-  //   {val:'v', txt:'Verb'},
-  //   {val:'adv', txt:'Adverb'},
-  //   {val:'adj', txt:'Adjective'},
-  //   {val:'c', txt:'Conjunction'},
-  //   {val:'int', txt:'Interjection'},
-  //   {val:'pron', txt:'Pronoun'},
-  //   {val:'prep', txt:'Preposition'},
-  //   {val:'g', txt:'Gerand'}
-  // ];
-
-
-
-  productForm: FormGroup | any;
+  // productForm: FormGroup | any;
   formState: string = 'new';
+
   name: string = '';
   brand: string = '';
   date: Date | any = null;
   active: boolean = true;
+
   error: boolean = false;
   errorMessage: string = 'general error';
   
+  notify: boolean = false;
+  notifyMessage: string = 'general notification';
+
   product: IProduct | any = null;
   buildingProduct: IProduct | any = null;
 
+  postMethodState = 'Add';
+  postMethodStates = ['Modify','Add'];
+
   inventoryListing: [] | any;
-  inventorySubscription: Subscription | any;
 
-  // @Output() createdProduct = new EventEmitter<IProduct>();
-  // @Input() listSelectedProduct: IProduct | any;
-
-  // @Output() preparingProduct = new EventEmitter<IProduct>();
-  // @Input() products: IProduct[] = [];
+  formExternalUpdate = false;
 
   constructor(public logger: TextService,
     public productService: ProductService,
-    public formBuilder: FormBuilder,
-    public inventory: InventoryService,
+    public _formBuilder: FormBuilder,
+    public coms: CommunicationsService
   ) { }
 
-  productSubscription: Subscription | any;
-  serviceSelectedProduct: IProduct | any | null;
+  productListSubscription: Subscription | any;
+  products: IProduct[] = [];
+
+
+  productCreateForm = this._formBuilder.group({
+    name: new FormControl('', Validators.required),
+    brand: new FormControl('', Validators.required),
+    date: new FormControl(this.now, Validators.required),
+    active: new FormControl('', Validators.required),
+  });
+
+
+  // serviceSelectedProduct: IProduct | any | null;
 
   // Init the form when starting the view.
   ngOnInit(): void {
     this.logger.ez.set_text('product_create_init', true);
-    this.initForm();
-    this.inventorySubscription = this.inventory.currentMessage.subscribe((products: any) => this.inventoryListing = products)
-    this.productService.selected.subscribe((product: IProduct | any | null) => this.registerSelectedProduct(product));
+    //this.inventory.currentMessage.subscribe((products: any) => this.inventoryListing = products)
+    this.productService.selected.subscribe((product: IProduct | any) => this.registerSelectedProduct(product));
+    
+    this.productListSubscription = this.productService.inventory.subscribe((
+      productList: IProduct[] | any | []) => this.products = productList);
+    
+    //this.productCreateForm.valueChanges.subscribe((value:any) => this.formChanged(value));
+
+    this.productCreateForm.valueChanges
+    .pipe(debounceTime(200), distinctUntilChanged())
+    .subscribe(values => {
+      this.talkBack(values,'form');
+    });
+
+    // merge(
+    //   this.productCreateForm.controls['name'].valueChanges
+    //     .pipe(
+    //       debounceTime(1500),
+    //       distinctUntilChanged(),
+    //       map(value => ({ name: value }))
+    //     ),
+    //   this.productCreateForm.controls['brand'].valueChanges
+    //     .pipe(
+    //       debounceTime(1500),
+    //       distinctUntilChanged(),
+    //       map(value => ({ brand: value }))
+    //     )
+    // )
+    // .subscribe(value => {
+    //   this.talkBack(value, 'merge');
+    // })
+
+    //this.initForm();
+  }
+
+
+
+  talkBack(values: any, from:string):void{
+    if(this.product !== null){
+      Object.assign(this.product, values);
+      console.log(this.product);
+    }
   }
 
   registerSelectedProduct(product:IProduct | any | null): void{
 
-    this.productForm.controls['name'].setValue(product !== null ? product.name : null);    
-    this.productForm.controls['brand'].setValue(product !== null ? product.brand : null);    
-    this.productForm.controls['date'].setValue(product !== null ? product.date : null);    
-    this.productForm.controls['active'].setValue(product !== null ? product.active : null);
+    //previously no selection
+    this.formExternalUpdate = true;
+    //this.coms.log(`"${name_value}" appears to be a new word. You may need to define it.`, {'icon':'warning','state':'create'});
 
-    if(product !== null && Array.isArray(product.meta.f)){
-      const actualPOS = product.meta.f.map((fp:any) => fp.val);
-      this.productForm.controls['brand'].setValue(actualPOS);
-      product.brand = actualPOS;
+
+    if(product !== null){
+
+      if(this.product === null && this.coms.coms_object.state === 'define'){
+        if(product.real){
+          this.coms.log(`"${product.name}" exists in the dictionary.`, {'state':'create'});
+        }else{
+          this.coms.log(`"${product.name}" appears to be a new word. You will need to define it.`, {'icon':'warning','state':'create'});
+        }
+      }
+
+      this.productCreateForm.patchValue(product);
+      
+
+      const exists = this.products.filter((m: IProduct) => m.name === product.name);
+      this.postMethodState = this.postMethodStates[+(exists.length === 0)];
+      if(exists){
+        this.productCreateForm.controls['name'].disable();
+        this.productCreateForm.controls['brand'].disable();
+      }
+
+      this.product = product;
+      this.logger.ez.set_text(`create_form serviceSelectedProduct: ${product !== null ? product.name : null}`, true);
+    }else{
+      this.productCreateForm.reset();
+      this.productCreateForm.controls['name'].enable();
+      this.productCreateForm.controls['brand'].enable();
+      this.productCreateForm.controls['date'].setValue(this.now);
+      this.product = null;
     }
-
-    this.product = product;
-    this.logger.ez.set_text(`create_form serviceSelectedProduct: ${product !== null ? product.name : null}`, true);
+    
+    this.formExternalUpdate = false;
   }
 
 
 
   ngOnChanges(): void {
-    // called by input and output
-    // console.log('something changed');
 
-    // if(this.listSelectedProduct !== null){
-    //   this.productService.get_definitions(this.listSelectedProduct)
-    //   .then((result: object | any) => {
-    //     console.log(result);
-
-    //     this.listSelectedProduct['def'] = result[0].definition.map((s: any, i:number) => {
-    //       const telly = new TopDefinition(s.word, s.meanings);
-    //       telly.populateBase();
-    //       return telly;
-    //     })
-
-    //     this.buildingProduct = this.listSelectedProduct;
-    //   });
-    // }
   }
 
-  ngOnDestroy() {
-    this.inventorySubscription.unsubscribe();
+  ngOnDestroy(): void {
+
   }
 
-  // track definitive change to field value. (not incremental).: now for input or mat-select.
-  formFieldChanged(event: any) {
-    const field_name = event.target ? 'name' : 'brand';
-    const field_value = event.target ? event.target.value : event.value;
-    console.log(field_name, field_value, this.serviceSelectedProduct);
 
-    if(field_name === 'name'){
-      const exists = this.inventoryListing.filter((m: any) => m.name === field_value);
+  showError(message: string): void{
+    this.error = true;
+    this.errorMessage = message;
+  }
 
-      if(exists.length > 0){
-        this.error = true;
-        this.errorMessage = `The name "${exists[0].name}" already exists in the inventory.`;
-        this.productForm.controls['name'].setErrors({'nomatch': true});
-        return;
-      }else{
-        if(/[a-zA-Z]/.test(field_value)){
-
-          this.buildingProduct = new Product(this.inventoryListing.length, this.productForm.value['name'], [], new Date(), false, false);
-          this.productService.setSelected(this.buildingProduct);
-          //this.defineWord(field_value);
-        }else{
-          this.productForm.controls['name'].setErrors({'nomatch': true});
-          this.productForm.controls['name'].setValue(null);
-        }
-      }
-    }
+  showNotify(message: string): void{
+    this.notify = true;
+    this.notifyMessage = message;
   }
 
   // Hide the error message.
@@ -173,136 +191,77 @@ export class ProductCreateFormComponent implements OnInit, OnDestroy {
     this.error = false;
     this.errorMessage = '';
   }
-  /*
-  //a definition was found for this word
-  definedWord(result: object | any){
-    const fw = ['word', 'meanings','partOfSpeech','definitions','definition','example','synonyms','antonyms'];
-    const scan = (obj: any) => {
-      Object.entries(obj).forEach(([key, val]) => 
-        (val && typeof val === 'object' && !Array.isArray(obj[key]) && (fw.includes(key) || !isNaN(parseInt(key)) )) && scan(val) ||
-        (val && (Array.isArray(obj[key]) && obj[key].length > 0) && (fw.includes(key) || !isNaN(parseInt(key)) )) && scan(val) ||
-        (val === null || val === "" || (Array.isArray(val) && val.length === 0) || (!fw.includes(key) && isNaN(parseInt(key)))) && delete obj[key]
-      );
-      return obj;
-    }
 
-    if(result){
-      this.buildingProduct = new Product(this.inventoryListing.length, result.word, result.brand, new Date(), true, true);
-      // this.buildingProduct['pos'] = result.pos;
-      const scanned = scan(result.def);
-      this.buildingProduct['def'] = scanned.map((s: any, i:number) => {
-        const telly = new TopDefinition(s.word, s.meanings);
-        telly.populateBase();
-        return telly;
-      })
-      this.buildingProduct.setMeta();
-    }else{
-      this.buildingProduct = new Product(this.inventoryListing.length, this.productForm.value['name'], [], new Date(), false, false);
-      this.formState = 'new';
-    }
+  // Hide the error message.
+  hideNotify() {
+    this.notify = false;
+    this.notifyMessage = '';
   }
-
   
-  // callback is forcibly on this function;
-  // gets word definition from dictionary api.
-  // finds part-of-speech of word and changes value of "brand" field accordingly.
-  defineWord(word: string){
-    const pos_filter = (pos: string) => PartsOfSpeech.filter(p => p.txt.toLowerCase() === pos)[0].val || null;
-
-    this.productService.define(word).then((result: object | any) => {
-      if (result === undefined) {
-        this.error = true;
-        this.errorMessage = result;
-      } else {
-        this.error = false;
-        //this.logger.ez.set_text(JSON.stringify(result, null, '\t'), true);
-        const pos : any[] = [];
-        const posOrdered : any[] = [];
-        
-        if(Array.isArray(result[0].raw)) {
-          result[0].raw.map((def: any, i: number) => {
-            posOrdered[i] = [];
-            def.meanings.map((m: any) => {
-                pos.push(m.partOfSpeech);
-                posOrdered[i].push(pos_filter(m.partOfSpeech));
-            })
-          });
-
-          const k_set = [...new Set([...pos])];
-          this.logger.ez.set_text(k_set, true);
-          const brand = k_set.map(k => pos_filter(k));
-          this.productForm.controls['brand'].setValue(brand);
-          return this.definedWord({word:word, brand:brand, pos:posOrdered, def:result[0].raw});
-
-        }else{
-          //no definitions available
-          this.error = true;
-          this.errorMessage = `No definitions available for "${word}".`;
-          this.productForm.controls['brand'].setValue(null);
-        }
-      }
-      return this.definedWord(false);
-    });
-  }
-  */ 
   // Manage the submit action and create the new product.
   onSubmit() {
-    if(!this.productForm.valid) return;
+    if(this.postMethodState === 'Add'){
+      if(!this.productCreateForm.valid) return;
+    
+      this.logger.ez.set_text(`creating name: ${this.product.name} (.${this.product.brand})`, true);
 
-    // let product: IProduct;
+      this.productService.create(this.product).then((result: Product | any) => {
+        if (result === undefined) {
+          this.error = true;
+        } else {
+          this.error = false;        
+          //this.showNotify(`Added entry for "${result.name}".`);
 
-    // if(this.buildingProduct !== null){
-    //   product = this.buildingProduct;
-    // }else{
-    //   product = new Product(
-    //     this.inventoryListing.length+1,
-    //     this.productForm.value['name'],
-    //     this.productForm.value['brand'],
-    //     this.productForm.value['date'],
-    //     this.productForm.value['active'],
-    //     false
-    //     );
+          this.coms.log(`added "${result.name}" to inventory.`);
 
-    //     product['pos'] = ['no positional data'];
-    //     product['def'] = [{'word':product['name'], 'definitions':'no definition available'}];
+          this.productCreateForm.reset();
+          this.productService.setSelected(result);
+        }
+      });
 
-    // }
-   
-    this.logger.ez.set_text(`creating name: ${this.product.name} (.${this.product.brand})`, true);
+    }else{
 
-    this.productService.create(this.product).then((result: Product | any) => {
-      if (result === undefined) {
-        this.error = true;
-      } else {
-        this.error = false;
-        this.logger.ez.set_text(`c daisies`, true);
-        
-        //this.createdProduct.emit(result);
-        this.productForm.controls['name'].setValue(null);
-        this.productForm.controls['brand'].setValue(null);
-        //this.buildingProduct = null;
-        this.productService.setSelected(result);
-      }
-    });
+      this.productService.modify(this.product._id, this.product)
+      .then((result: Product | any) => {
+        console.log(result);
+      })
+
+    }
   }
 
-  // Init the creation form.
-  private initForm() {
-    this.productForm = new FormGroup({
-      name: new FormControl(this.name, Validators.required),
-      brand: new FormControl(this.brand, Validators.required),
-      date: new FormControl(this.date, Validators.required),
-      active: new FormControl(this.active, Validators.required),
-    });
 
-    this.productForm.get("name").valueChanges.subscribe((val:any) => {
-      if (val) {
-        this.now = new Date();
-        this.productForm.controls['date'].setValue(this.now);
-      }
-    });
+  nameChanged(event:any){
+    if(this.formExternalUpdate) return;
 
-    this.productForm.controls['date'].setValue(this.now);
+    const name_value = event.target.value;
+    const exists = this.products.filter((m: IProduct) => m.name === name_value);
+
+    if(exists.length > 0){
+      this.coms.log(`The name "${exists[0].name}" already exists in the inventory.`, {'icon':'warning','state':'create'});
+      //this.showError(`The name "${exists[0].name}" already exists in the inventory.`);
+      this.productCreateForm.controls['name'].setErrors({'nomatch': true});
+      return;
+    }else{
+      this.error = false;
+    }
+
+    if(/[a-zA-Z]/.test(name_value)){
+      this.logger.ez.set_text(name_value, true);
+      this.productCreateForm.controls['name'].setErrors(null);
+      this.buildingProduct = new Product(this.products.length, name_value, [], new Date(), false, false);
+      this.coms.log(`seeking definition for "${name_value}"...`, {'icon':'warning','state':'define'});
+      this.productService.setSelected(this.buildingProduct);
+    }else{
+      this.productCreateForm.controls['name'].setErrors({'nomatch': true});
+      this.productCreateForm.controls['name'].setValue(null);
+    }
+
+    event.target.blur();
+  }
+
+  reset():void{
+    this.product = null;
+    this.productService.setSelected(null);
   }
 
 }

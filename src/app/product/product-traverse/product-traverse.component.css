@@ -5,3 +5,14 @@
 .example-chip .cdk-drop-list-dragging {
     transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
 }
+
+/* .mdc-card, .mat-mdc-card {
+    display: flex;
+    flex-direction: row !important;
+    flex-wrap: wrap;
+    align-items: left;
+    padding:4px;
+    margin-bottom:8px;
+    border-radius: 1px !important;
+    box-sizing: border-box;
+} */

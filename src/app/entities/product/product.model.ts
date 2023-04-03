@@ -1,6 +1,3 @@
-//import { IMeaning } from 'src/app/entities/meaning/meaning.model';
-import { auxPartsOfSpeech } from 'src/app/product/product-create-form/product-create-form.component'
-import { TopDefinition, Meaning } from "../meaning/meaning.model";
 
 export interface IProduct {
   _id?: string | any | null;
@@ -15,7 +12,6 @@ export interface IProduct {
   pos?: string[]; //parts of speech
   def?: any[]; //asserted definition
   meta?: object; //asserted definition
-  // setMeta: () => object | {};
 }
 
 export class Product implements IProduct {
@@ -45,22 +41,6 @@ export class Product implements IProduct {
     this.pos = pos ? pos : [];
     this.def = def ? def : [];
     this.meta = meta ? meta : {};
-    //this.setMeta = this.setMeta;
   }
-
-  // public setMeta(){
-  //   console.log('called')
-  //   const flat = new Array();
-  //   const struct = {};
-  //   this.def?.map((d:TopDefinition, di:number) => {
-  //     struct[di] = {};
-  //     d.meanings?.map((m:Meaning, mi:Number) => {
-  //       flat.push(m.partOfSpeech);
-  //       struct[di][mi] = m.partOfSpeech;
-  //     })
-  //   })
-  //   this.meta = {m:struct, f:[...new Set([...flat])]};
-  //   return this.meta;
-  // }
 
 }

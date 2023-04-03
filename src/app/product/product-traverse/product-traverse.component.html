@@ -1,13 +1,13 @@
 
-
+<section>
 <mat-card>
-    <p>product-traverse works! ({{ product_list.length }}) products.</p>
+    <!-- <p>product-traverse works! ({{ product_list.length }}) products.</p> -->
     <!-- [formControl]="myControl"  -->
     <!-- [disabled]="!product.active"  -->
 
     <form [formGroup]="stateForm">
 
-        <mat-label>Phrase Parts</mat-label>
+        <!-- <mat-label>Phrase Parts</mat-label> -->
         <mat-chip-grid class="example-chip"
             #chipGrid 
             cdkDropList 
@@ -55,13 +55,15 @@
                     </mat-option>
                 </mat-optgroup>
             </mat-autocomplete>
+            <mat-hint>{{ output.text }}</mat-hint>
         </mat-form-field>
     </form>
 
 
 </mat-card>
 
-<mat-card *ngIf="output.state" role="alert">
+<!-- <mat-card *ngIf="output.state" role="alert">
     <div><div class="card-label">{{ output.text }}</div></div>
-</mat-card>
+</mat-card> -->
 
+</section>
