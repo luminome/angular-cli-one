@@ -35,10 +35,6 @@
     "strictTemplates": true,
     "noImplicitAny": false,
     "allowJs": true
-  },
-  // "include": [
-  //   "src/**/*",
-  //   "src/assets/ez-text/css/eztext.d.ts",   // declaration file path
-  // ],
+  }
 
 }
