@@ -28,6 +28,7 @@ export class CommunicationsService {
     delta: null
   }
 
+  
   constructor() { }
   
   private messageSource = new BehaviorSubject(this.coms_object as any);
