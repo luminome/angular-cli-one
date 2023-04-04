@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 
-import { InventoryService } from './coms.service';
+import { CommunicationsService } from './coms.service';
 
 describe('StatusService', () => {
-  let service: InventoryService;
+  let service: CommunicationsService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(InventoryService);
+    service = TestBed.inject(CommunicationsService);
   });
 
   it('should be created', () => {
