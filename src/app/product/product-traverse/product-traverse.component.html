@@ -48,6 +48,7 @@
                     (keyup)="getCaretPos($event)"
                     (matChipInputTokenEnd)="addProductChip($event)"
                     [matChipInputSeparatorKeyCodes]="separatorKeysCodes">
+                    
             <mat-autocomplete #autoGroup="matAutocomplete" (optionSelected)="selected($event)">
                 <mat-optgroup *ngFor="let group of stateGroupOptions | async" [label]="group.letter">
                     <mat-option *ngFor="let product of group.names" [value]="product">
@@ -56,6 +57,16 @@
                 </mat-optgroup>
             </mat-autocomplete>
             <mat-hint>{{ output.text }}</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill">
+            <mat-label>Choose Lex</mat-label>
+            <input type="text"
+                    matInput
+                    #lexInput
+                    [formControl]="lexInputControl">
+
+
         </mat-form-field>
     </form>
 
