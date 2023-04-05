@@ -2,10 +2,13 @@
     display: flex;
     flex-direction: row !important;
     flex-wrap: wrap;
+    flex-basis: 1 0;
+    /* flex-wrap: wrap;
     align-items: left;
     padding:4px;
     margin-bottom:8px;
-    /* border-radius: 1px !important; */
+    border-radius: 1px !important;
+    box-sizing: border-box; */
     box-sizing: border-box;
 }
 
@@ -18,4 +21,74 @@
     font-size:0.75em;
     padding-left: 4px;
     opacity:0.5;
+}
+
+.coms-list-left{
+    padding:4px;
+}
+
+.coms-list-center{
+    flex: 1;
+}
+
+.coms-list-right{
+    padding:4px;
+}
+
+.coms-container{
+    display: flex;
+    flex-direction: row !important;
+    /* flex-basis: 0 1; */
+}
+
+.coms-element{
+    display: flex;
+    flex-direction: row !important;
+    padding:4px;
+    margin: 4px 0;
+    border-radius: 4px;
+    flex: 1;
+}
+
+.coms-container:not(:only-child):not(:last-child){
+    border-bottom: 1px rgba(0,0,0,0.1) solid;
+}
+
+.coms-element:hover{
+    background: rgba(0,0,0,0.05);
+}
+
+.coms-element > * {
+    vertical-align: middle;
+}
+
+.coms-element span{
+    display: block;
+    position: relative;
+    top: 50%;
+    transform: translateY(-50%);
+    -ms-transform: translateY(-50%);
+    -moz-transform: translateY(-50%);
+    -webkit-transform: translateY(-50%);
+    -o-transform: translateY(-50%);
+    /* text-transform: uppercase; */
+}
+
+.com-date-str{
+    font-size:0.75em;
+    opacity:0.5;
+    flex: 1;
+    text-align: right;
+}
+
+.coms-detail{
+    padding:4px;
+    white-space: pre;
+    font-size:0.6em;
+    border-radius: 8px;
+    background-color: rgba(0,0,0,0.1);
+}
+
+app-coms-solo{
+    flex: 1;
 }
