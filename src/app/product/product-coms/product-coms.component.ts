@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { CommunicationsService } from "src/app/shared/coms.service";
+import { Com, ICom } from 'src/app/entities/com/com.model';
 
 @Component({
   selector: 'app-product-coms',
@@ -9,43 +10,39 @@ import { CommunicationsService } from "src/app/shared/coms.service";
 
 export class ProductComsComponent {
 
-
   constructor(public coms: CommunicationsService) { }
 
+  coms_obj: ICom[] | any = [];
+  coms_history: ICom[] = [];
 
-  coms_obj: any = null;
+  coms_new: boolean = false;
 
   ngOnInit(): void {
-    this.coms.log(['hello', 'inited'],{'state':'init'});
-    this.coms.coms_obs.subscribe((ICom: any) => this.coms_obj = ICom);
-
+    this.coms.log('session started',{'state':'init'});
+    this.coms.coms_obs.subscribe((ICom: ICom|any) => this.showComs(ICom));
+    this.coms.coms_history.subscribe((IComs: ICom[]|any) => this.procComsHistory(IComs));
   }
 
+  procComsHistory(IComs:ICom[]|any): void{
+    this.coms_history = IComs;
+    this.coms_obj = this.coms_history;//.reverse();
+  }
+
+  showComs(obj:ICom) {
+    if(!this.coms_history.includes(obj)) this.coms_history.unshift(obj);
+    this.coms_obj = [obj];
+    this.coms_new = true;
+  }
 
   hideComs() {
-    this.coms_obj.visible = false;
+    this.coms_new = false;
   }
-
-  // showError(message: string): void{
-  //   this.error = true;
-  //   this.errorMessage = message;
-  // }
-
-  // showNotify(message: string): void{
-  //   this.notify = true;
-  //   this.notifyMessage = message;
-  // }
-
-  // // Hide the error message.
-  // hideError() {
-  //   this.error = false;
-  //   this.errorMessage = '';
-  // }
-
-  // // Hide the error message.
-  // hideNotify() {
-  //   this.notify = false;
-  //   this.notifyMessage = '';
-  // }
-
+  
+  showComsHistory(active:boolean | any): void{
+    if(active){
+      this.coms.get();
+    }else{
+      this.coms_obj = [this.coms_history[0]];
+    }
+  }
 }

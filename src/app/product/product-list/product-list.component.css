@@ -1,4 +1,4 @@
-.delete {
+/* .delete {
     color: red !important;
     font-weight: bold;
     cursor: pointer !important;
@@ -65,12 +65,134 @@ opacity: 0.5;
     align-items: left;
     padding:4px;
     margin-bottom:8px;
-    /* border-radius: 1px !important; */
     box-sizing: border-box;
 }
 
 
 
+*/
+
+tr.example-detail-row {
+    height: 0;
+}
+
+tr.example-element-row:not(.example-expanded-row):hover {
+    background: whitesmoke;
+}
+
+tr.example-element-row:not(.example-expanded-row):active {
+    background: #efefef;
+}
+
+.example-element-row td {
+    border-bottom-width: 0;
+    background: none;
+}
+
+.example-element-detail {
+    overflow: hidden;
+    display: flex;
+}
+
 .mdc-data-table__row{
     height:auto !important;
-  }
+} 
+
+.product-list-table, .mat-mdc-table {
+    width: 100%;
+    background: none;
+    box-sizing: border-box;
+    border-radius: 4px !important;
+}
+
+.mdc-card, .mat-mdc-card {
+    /* display: flex; */
+    /* flex-direction: row !important;
+    flex-wrap: wrap; */
+    align-items: left;
+    padding:4px;
+    margin-bottom:8px;
+    box-sizing: border-box;
+}
+
+
+
+.time-container{
+    /* display: flex; */
+    /* flex-wrap: wrap;
+    /* flex-direction: row;
+    align-items: flex-start; */
+    /* flex-flow: row wrap;  */
+/* 
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    box-sizing: border-box;
+    flex-basis: auto 1; */
+}
+
+.time-row{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    box-sizing: border-box;
+    /* flex-basis: auto 1; */
+    /* flex: 0 1 auto; */
+    margin-bottom: 2px;
+    vertical-align: bottom;
+    position: relative;
+    height: auto;
+    /* flex-basis: 0 1; */
+}
+
+.time-row div{
+    /* border: 1px rgba(0,0,0,0.1) solid; */
+    box-sizing: border-box;
+}
+
+.time-row>div:first-child{
+    position: relative;
+    min-width: 32px;
+    border-right: 2px rgba(0,0,0,0.25) solid;
+}
+
+.time-row>div:last-child{
+    flex: 1;
+    padding-left:8px;
+}
+
+.time-index{
+    position: absolute; 
+    /* background-color: pink; */
+    font-size: 0.6em;
+    top: 0;
+}
+
+.time-label{
+    position: absolute; 
+    top: 0;
+}
+
+
+.time-marker{
+    width: 16px;
+    height: 16px;
+    position: absolute;
+    top:-8px;
+    right:-8px;
+
+    /* position: relative;
+    left: 50%; */
+    /* transform: translateX(-50%); */
+    /* -ms-transform: translateY(-50%);
+    -moz-transform: translateY(-50%);
+    -webkit-transform: translateY(-50%);
+    -o-transform: translateY(-50%); */
+}
+
+.svg-hexagon{
+    fill:#FFFFFF;
+    stroke: rgba(0,0,0,0.25);
+    stroke-width:2;
+    stroke-miterlimit:10;
+}

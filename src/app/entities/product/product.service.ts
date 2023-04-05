@@ -72,9 +72,11 @@ export class ProductService {
                     if(Array.isArray(result[0].raw)){
                         product.real = true;
                         product.def = this.prepareDef(result[0].raw, true);
+                        product.object = product.def.map((d:TopDefinition) => d.id);
                     }else{
                         product.real = false;
                         product.def = [new TopDefinition(product.name,[])];
+                        product.object = product.def[0].id;
                         console.log("probably a new entry, with no meaning found, roll-your-own");
                     }
                     this.prepareProductMeta(product);
@@ -87,6 +89,7 @@ export class ProductService {
                 .then((result: any) =>{
                     product.real = true;
                     product.def = result[0].definition;
+                    product.object = product.def.map((d:TopDefinition) => d.id);
                     this.prepareProductMeta(product);
                     return this.selectedProduct.next(product);
                 }).catch(this.error);
@@ -128,6 +131,7 @@ export class ProductService {
 
 
     public async create(product: Product){
+        product.object = undefined;
         const req = this.http.post(this.productsUrl, product);
         return await firstValueFrom(req)
             .then((response : IProduct | any | null) => {

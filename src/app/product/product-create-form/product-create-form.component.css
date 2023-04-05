@@ -1,4 +1,7 @@
-
+.create-form-container{
+  box-sizing: border-box;
+  border-radius: 3px;
+}
 
 .fields{
   display: flex;

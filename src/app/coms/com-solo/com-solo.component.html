@@ -1,0 +1,11 @@
+<div class="coms-element" (click)="detail()">
+    <div><mat-icon *ngIf="com.icon" color="primary">{{ com.icon }}</mat-icon></div>
+    <div>
+        <div class="coms-text" *ngFor="let i = index; let text of com.text">{{ text }}</div>
+        <div class="coms-subtext">{{ com.delta }} ({{ com.state }})</div>
+        <div *ngIf="detail_on" class="coms-detail">{{ detail_body }}</div>
+    </div>
+    <div class="com-date-str">
+        <span>{{ com.time | date:'medium' }}</span> 
+    </div>
+</div>

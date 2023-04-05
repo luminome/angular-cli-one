@@ -24,7 +24,7 @@ ng generate model entities/product-meaning --module=app.module.ts ?
 
 Because a model is a class, to generate it use --type option like this:
 
-ng generate class hero --type=model
+ng generate class entities/com/com --type=model
 
 
 const flatMeta = (m:object, a:[] | any) => {
@@ -86,3 +86,17 @@ ng g c product/product-coms --module=app.module.ts
             <mat-icon color="primary">add</mat-icon> Add Definition
         </button>
     </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    ng g c coms/com-solo --module=app.module.ts

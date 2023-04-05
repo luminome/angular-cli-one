@@ -1,14 +1,21 @@
-<section *ngIf="coms_obj.visible">
-    <mat-card  role="alert">
-        <div>
+<section [style.display]="['none','block'][+(coms_new)]">
+    <mat-card>
+        <div class="coms-list-left">
             <button mat-icon-button class="delete" (click)="hideComs()" aria-label="coms_obj.text">
-                <mat-icon color="primary">block</mat-icon>
+                <mat-icon color="primary">close</mat-icon>
             </button>
         </div>
-        <div><mat-icon *ngIf="coms_obj.icon" color="primary">{{ coms_obj.icon }}</mat-icon></div>
-        <div>
-            <div class="coms-text" *ngFor="let i = index; let text of coms_obj.text">{{ text }}</div>
-            <div class="coms-subtext">{{ coms_obj.delta }} StateManager:{{ coms_obj.state }}</div>
+        <div class="coms-list-center">
+            <div *ngFor="let i = index; let com of coms_obj" class="coms-container">
+                <!-- import -->
+                <app-coms-solo [com]="com"></app-coms-solo>
+            </div>
+        </div>
+        <div class="coms-list-right">
+            <button mat-icon-button (click)="showComsHistory(coms_obj.length === 1); $event.preventDefault();" aria-label="expand row">
+                <mat-icon *ngIf="coms_obj.length === 1">keyboard_arrow_down</mat-icon>
+                <mat-icon *ngIf="coms_obj.length > 1">keyboard_arrow_up</mat-icon>
+            </button>
         </div>
     </mat-card>
 </section>

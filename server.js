@@ -29,27 +29,22 @@ app.set('json spaces', 2);
 // The `ng build` command will save the result
 // under the `dist` folder.
 var distDir = __dirname + '/dist/angular-cli-one'; //__dirname + "/dist/";
-console.log(__dirname, distDir);
 app.use(express.static(distDir));
 
-var staticDir = __dirname + '/static'; //__dirname + "/dist/";
-console.log(__dirname, staticDir);
-app.use(express.static(staticDir));
+// var staticDir = __dirname + '/static'; //__dirname + "/dist/";
+// console.log(__dirname, staticDir);
+// app.use(express.static(staticDir));
 // Local database URI.
 // const REMOTE_DATABASE = "mongodb://localhost:27017/app";
 // Local port.
+
 const LOCAL_PORT = 8080;
 const REMOTE_DATABASE = 'mongodb+srv://cluster0.n4fxvug.mongodb.net/?authSource=%24external&authMechanism=MONGODB-X509&retryWrites=true&w=majority';
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
-
-// var ObjectId = ObjectID;
-
-const fs = require('fs');
+// const fs = require('fs');
 
 const credentials = '/Users/sac/Sites/library/mongo/X509-cert-7010500130319648579.pem' //'<path_to_certificate>'
-
-
 const client = new MongoClient('mongodb+srv://cluster0.n4fxvug.mongodb.net/?authSource=%24external&authMechanism=MONGODB-X509&retryWrites=true&w=majority', {
   sslKey: credentials,
   sslCert: credentials,
@@ -62,17 +57,90 @@ client.connect();
 database = client.db("app");
 products_collection = database.collection("products");
 products_defs_collection = database.collection("product_def");
+coms_collection = database.collection("coms");
 
-const docCount = products_collection.countDocuments({});
-console.log('docCount', docCount);
-console.log("Database connection started.");
+
+async function runMongoLoader() {
+	let container = [];
+    let resource_obj_list = [
+        {name:'products', part: products_collection}, 
+        {name:'products_defs', part: products_defs_collection},
+        {name:'coms', part: coms_collection},
+    ];
+
+	resource_obj_list.forEach(obj => {
+        const count = obj.part.countDocuments({})
+		.then(response => {
+			obj.size = response;
+			return response;
+		})
+		.catch((error) => {
+			console.log(error.status, error);
+			return error;
+		})
+		container.push(count);
+	});
+
+	const done = await Promise.all(container);
+	resource_obj_list.forEach((obj,i) => obj.count = done[i]);
+	return resource_obj_list;
+}
+
+
+
+
+runMongoLoader().then(res=>runServer(res));
+
+function runServer(mongo_data){
+    console.log('Express is serving from', distDir);
+    mongo_data.forEach(obj => {
+        console.log(`Collection "${obj.name}" contains (${obj.count}) documents.`);
+    });
+
+    // Initialize the app.
+    var server = app.listen(process.env.PORT || LOCAL_PORT, function () {
+        var port = server.address().port;
+        console.log("App now running on port", port);
+    });
+}
+
+
+
+
+
+
+
+
+/*  "/api/coms"
+ *  GET: finds all communications
+ */
+app.get("/api/coms", function (req, res) {
+    coms_collection.find({}).sort( { time: -1 } ).limit(50).toArray().then(response => {
+        res.status(200).json(response);
+    });
+});
+
+/*  "/api/coms"
+ *  GET: finds all products
+ */
+app.post("/api/coms", function (req, res) {
+    var com = req.body;
+    coms_collection.insertOne(com)
+    .then(response => {
+        res.status(200).json(response.product);
+    });
+});
+
+
+
 
 /*  "/api/status"
  *   GET: Get server status
  *   PS: it's just an example, not mandatory
  */
 app.get("/api/status", function (req, res) {
-    res.status(200).json({ status: "UP" });
+    var ip = req.headers;//['x-forwarded-for'].split(',')[0];
+    res.status(200).json({ status: "UP", ip:ip });
 });
 
 /*  "/api/products"
@@ -195,9 +263,3 @@ function manageError(res, reason, message, code) {
 // run().catch(console.dir);
 // console.log('what');
 
-
-// Initialize the app.
-var server = app.listen(process.env.PORT || LOCAL_PORT, function () {
-    var port = server.address().port;
-    console.log("App now running on port", port);
-});

@@ -1,6 +1,46 @@
+
+
 <section>
-<div class="table-container mat-elevation-z4">
-<table multiTemplateDataRows mat-table matSortActive="date" matSortDirection="desc" [dataSource]="inventoryDataArray" matSort>
+  <form [formGroup]="viewSelectForm">
+    <mat-button-toggle-group formControlName = "view" aria-label="View Style">
+        <mat-button-toggle
+        *ngFor="let view of ListViews;" 
+        [value]="view">{{view}} 
+        </mat-button-toggle>
+    </mat-button-toggle-group>
+  </form>
+  <!-- matTooltip="{{def.id}}"  -->
+  <div [style.display]="['none','block'][+(currentView === 'timeline')]">
+    <mat-card>
+      <div>
+        <div class="time-container">      
+          <div class="time-row" *ngFor="let i = index; let state of stateGroups">
+            <div [style.height]="(state.delta_ms+24)+'px'">
+              <div class="time-index">
+                {{i}}&nbsp;
+              </div>
+              <svg class="time-marker" viewBox="0 0 32 32" >
+                <polygon class="svg-hexagon" points="4.4,9.3 4.4,22.7 16,29.4 27.6,22.7 27.6,9.3 16,2.6 "/>
+              </svg>
+            </div>
+            <div>
+              <div class="time-label">
+                {{state.product.name}}
+                {{state.delta_str}}
+                {{state.delta_ms}}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </mat-card>
+
+
+
+
+  </div>
+
+  <table [style.visibility]="['collapse','visible'][+(currentView === 'table')]" class="product-list-table mat-elevation-z4" multiTemplateDataRows mat-table matSortActive="date" matSortDirection="desc" [dataSource]="inventoryDataArray" matSort>
     <!-- matSortDisableClear -->
     <!-- Number Column -->
     <ng-container matColumnDef="id">
@@ -87,17 +127,6 @@
     </tr>
     <tr mat-row *matRowDef="let row; columns: ['expandedDetail']; let i = index;" class="example-detail-row" [ngClass]="{'new-row': row.active == false }"></tr>
 
-
-    <!-- (click)="expandedElement = expandedElement === element ? null : element; 
-    setProductSelection(element, expandedElement === element); $event.stopPropagation();" -->
-
-      <!-- (click)="this.expandedElement = this.expandedElement === element ? null : element; 
-          setProductSelection(element, this.expandedElement === element); $event.stopPropagation()" -->
-
-      <!-- (click)="this.expandedElement = this.expandedElement === element ? null : element"> -->
-    <!-- <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr> -->
-    <!-- <tr mat-row *matRowDef="let row;" [disabled]="!row.active"></tr> -->
-    <!-- <tr mat-row *matRowDef="let row; let i = index; columns: displayedColumns;" [ngClass]="{'new-row': row.active == false }"></tr> -->
 </table>
-</div>
+
 </section>

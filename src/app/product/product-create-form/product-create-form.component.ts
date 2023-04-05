@@ -134,11 +134,11 @@ export class ProductCreateFormComponent implements OnInit, OnDestroy {
 
     if(product !== null){
 
-      if(this.product === null && this.coms.coms_object.state === 'define'){
+      if(this.product === null && this.coms.coms_object.state === 'create-define'){
         if(product.real){
-          this.coms.log(`"${product.name}" exists in the dictionary.`, {'state':'create'});
+          this.coms.log(`"${product.name}" exists in the dictionary.`, {'state':'create-existing','from_id':product.id, 'object':product.object});
         }else{
-          this.coms.log(`"${product.name}" appears to be a new word. You will need to define it.`, {'icon':'warning','state':'create'});
+          this.coms.log(`"${product.name}" appears to be a new word. You will need to define it.`, {'icon':'warning','state':'create-new','from_id':product.id, 'object':product.object});
         }
       }
 
@@ -212,7 +212,7 @@ export class ProductCreateFormComponent implements OnInit, OnDestroy {
           this.error = false;        
           //this.showNotify(`Added entry for "${result.name}".`);
 
-          this.coms.log(`added "${result.name}" to inventory.`);
+          this.coms.log(`added "${result.name}" to inventory.`, {'from_id':result.id});
 
           this.productCreateForm.reset();
           this.productService.setSelected(result);
@@ -237,9 +237,10 @@ export class ProductCreateFormComponent implements OnInit, OnDestroy {
     const exists = this.products.filter((m: IProduct) => m.name === name_value);
 
     if(exists.length > 0){
-      this.coms.log(`The name "${exists[0].name}" already exists in the inventory.`, {'icon':'warning','state':'create'});
-      //this.showError(`The name "${exists[0].name}" already exists in the inventory.`);
-      this.productCreateForm.controls['name'].setErrors({'nomatch': true});
+      this.coms.log(`The name "${exists[0].name}" already exists in the inventory.`, 
+        {'icon':'warning','state':'create-exists','from_id':exists[0].id});
+
+        this.productCreateForm.controls['name'].setErrors({'nomatch': true});
       return;
     }else{
       this.error = false;
@@ -249,7 +250,8 @@ export class ProductCreateFormComponent implements OnInit, OnDestroy {
       this.logger.ez.set_text(name_value, true);
       this.productCreateForm.controls['name'].setErrors(null);
       this.buildingProduct = new Product(this.products.length, name_value, [], new Date(), false, false);
-      this.coms.log(`seeking definition for "${name_value}"...`, {'icon':'warning','state':'define'});
+      this.coms.log(`seeking definition for "${name_value}"...`, 
+        {'icon':'warning','state':'create-define','from_id':this.buildingProduct.id});
       this.productService.setSelected(this.buildingProduct);
     }else{
       this.productCreateForm.controls['name'].setErrors({'nomatch': true});

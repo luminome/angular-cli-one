@@ -1,6 +1,6 @@
 import { Component, OnInit, Input, OnChanges, OnDestroy, ViewChild, Output, EventEmitter } from '@angular/core';
 import {animate, state, style, transition, trigger} from '@angular/animations';
-
+import { FormBuilder, FormControl, Validators } from '@angular/forms';
 import { ProductService } from 'src/app/entities/product/product.service';
 import { IProduct } from 'src/app/entities/product/product.model';
 
@@ -8,7 +8,15 @@ import { TextService } from "src/app/shared/text.service";
 import { Subscription, mergeMap } from 'rxjs';
 import { MatSort, Sort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
-import { CommunicationsService } from 'src/app/shared/coms.service';
+import { CommunicationsService, formatMs, normVal } from 'src/app/shared/coms.service';
+
+
+export interface StateGroup {
+  letter: string;
+  product: IProduct;
+  delta_str: string;
+  delta_ms: number;
+}
 
 export interface PeriodicElement {
   name: string;
@@ -41,6 +49,9 @@ export class ProductListComponent implements OnInit, OnChanges, OnDestroy {
   productListSubscription: Subscription | any;
   
   users: IProduct | any | null;
+  stateGroups: StateGroup[] = [];
+
+  ListViews: [] | any = ['table','timeline'];
 
   @ViewChild(MatSort) sort!: MatSort;
   // @Output() selectedProduct = new EventEmitter<IProduct>();
@@ -50,11 +61,24 @@ export class ProductListComponent implements OnInit, OnChanges, OnDestroy {
 
   // productSubscription: Subscription | any;
   serviceSelectedProduct: IProduct | any | null;
+  currentView: string | any = 'table';
+
+  viewSelectForm = this._formBuilder.group({
+    view: new FormControl('table'),
+  });
 
   constructor(
     protected productService: ProductService, 
+    public _formBuilder: FormBuilder,
     private logger: TextService,
     public coms: CommunicationsService) { }
+
+
+
+
+
+
+
 
 
   // Load all the products when starting the view.
@@ -67,8 +91,15 @@ export class ProductListComponent implements OnInit, OnChanges, OnDestroy {
       this.updateCurrentInventory(productList);
     });
 
+    this.viewSelectForm.controls['view'].valueChanges.subscribe((value: string | any) => this.currentView = value);
+
     this.productService.get();
     // this.loadAll();
+  }
+
+  ngAfterViewInit(): void{
+    // for(let i=0;i<k_chars.length;i++){
+    // }
   }
 
   ngOnDestroy() {
@@ -81,16 +112,48 @@ export class ProductListComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   updateCurrentInventory(productList:IProduct[] | []){
-    this.logger.ez.set_text(`product_list updateCurrentInventory: (${productList.length}) products.`, true);
+    if(productList.length === 0) return;
+
     this.products = productList;
     this.inventoryDataArray.data = this.products;
     this.inventoryDataArray.sort = this.sort;
+    this.coms.log(`(${this.products.length}) products`, {'state':`product-list-update-inventory`});
+
+    //build states object
+    const k_group: StateGroup[] = [];
+    const deltas:number[] = [];
+    let pre_time = new Date().getTime();
+
+    for(let i=0;i<this.products.length;i++){
+      const p_time = new Date(this.products[i].date).getTime();
+      const delta = p_time - pre_time > 0 ? p_time - pre_time : 0;
+      const delta_str = formatMs(delta);
+      deltas.push(delta);
+      this.logger.ez.set_text(`${this.products[i].name} ${delta_str}`, true);
+      
+      const r_part = {
+        'letter': this.products[i].name.substring(0,1),
+        'product': this.products[i],
+        'delta_str': delta_str,
+        'delta_ms': delta
+      };
+      pre_time = p_time;
+      k_group.push(r_part);
+    }
+
+    const k_max = Math.max(...deltas);
+    const k_min = Math.min(...deltas);
+    k_group.map((part:any) => {
+      part.delta_ms = Math.round(normVal(part.delta_ms, k_min, k_max)*1000);
+    })
+
+
+
+    this.stateGroups = k_group.reverse();
   }
 
   registerSelectedProduct(product:IProduct | any | null): void{
-
     this.logger.ez.set_text(`product_list serviceSelectedProduct: ${product !== null ? product.name : null}`, true);
-
     if(product !== null){
       this.logger.ez.set_text(`status: ${product.name} in list ? ${this.products.includes(product)}`, true);
     }else{
@@ -102,10 +165,10 @@ export class ProductListComponent implements OnInit, OnChanges, OnDestroy {
   setProductSelection(element: IProduct | null): void{
     if(element !== null){
       this.product = element;
-      this.coms.log(`selected: "${element.name}"`, {'state':`product-list-selected`});
+      this.coms.log(`selected: "${element.name}"`, {'state':`product-list-selected`, 'from_id':element.id});
       this.productService.setSelected(this.product);
     }else{
-      this.coms.log(`deselected: "${this.product.name}"`, {'state':`product-list-deselected`});
+      this.coms.log(`deselected: "${this.product.name}"`, {'state':`product-list-deselected`, 'from_id':this.product.id});
       this.product = null;
       this.productService.setSelected(null);
     }
@@ -120,9 +183,9 @@ export class ProductListComponent implements OnInit, OnChanges, OnDestroy {
     .then((result: any) => {
       this.product.active = !state;
       this.productService.setSelected(this.product);
-      this.coms.log(`updated: "${element.name} (.${element.brand})" -> Set active to ${!state}`, {'icon':'check_circle_outline','state':`product-list-active-${!state}`});
+      this.coms.log(`updated: "${element.name} (.${element.brand})" -> Set active to ${!state}`,
+        {'icon':'check_circle_outline','state':`product-list-active-${!state}`,'object':result, 'from_id':this.product.id});
       this.productService.setSelected(this.product);
-      this.logger.ez.set_text(`updated: "${element.name} (.${element.brand})" -> Set active to ${!state}\n ${JSON.stringify(result, null, '\t')}`, true);
     });
   }
 
@@ -136,12 +199,10 @@ export class ProductListComponent implements OnInit, OnChanges, OnDestroy {
         this.products.splice(index, 1);
         this.inventoryDataArray.data = this.products;
       }
-      
+    
+      this.coms.log(`permanently deleted: "${element.name} (.${element.brand})"`, 
+        {'icon':'delete_forever','state':'product-list-delete','object':result, 'from_id':this.product.id});
 
-
-      this.coms.log(`permanently deleted: "${element.name} (.${element.brand})"`, {'icon':'delete_forever','state':'product-list-delete'});
-
-      this.logger.ez.set_text(`permanently deleted: "${element.name} (.${element.brand})" \n ${JSON.stringify(result, null, '\t')}`, true);
       this.productService.setSelected(null);
     });
   }
