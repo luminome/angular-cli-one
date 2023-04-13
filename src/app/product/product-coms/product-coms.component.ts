@@ -18,7 +18,7 @@ export class ProductComsComponent {
   coms_new: boolean = false;
 
   ngOnInit(): void {
-    this.coms.log('session started',{'state':'init'});
+    // this.coms.log('session started',{'state':'init'});
     this.coms.coms_obs.subscribe((ICom: ICom|any) => this.showComs(ICom));
     this.coms.coms_history.subscribe((IComs: ICom[]|any) => this.procComsHistory(IComs));
   }

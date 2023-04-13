@@ -38,13 +38,53 @@ app.use(express.static(distDir));
 // const REMOTE_DATABASE = "mongodb://localhost:27017/app";
 // Local port.
 
+function formatMs(ms, decimals = 2) {
+    if (!+ms) return '0 ms';
+    const dm = decimals < 0 ? 0 : decimals
+    const sizes = ['ms', 's', 'm'];
+    const scales = [1, 1000, 60000];
+    let i = 0;
+    if(ms >= 1000) i = 1;
+    if(ms >= 60000) i = 2;
+    return `${i === 0 ? ms : (ms/scales[i]).toFixed(dm)}${sizes[i]}`;
+}
+
+//back in Transaction.
+
+const timer = (var_name) => {
+    function start(){
+        T.T1 = Date.now();
+        return this;
+    }
+    function stop(){
+        T.T2 = Date.now() - T.T1;
+        return T.T2;
+    }
+    const T = {
+        var_name: var_name,
+        T1: 0.0,
+        T2: 0.0,
+        start,
+        stop
+    }
+    return T;
+}
+
+
+
+
+
+
+
+
+
 const LOCAL_PORT = 8080;
 const REMOTE_DATABASE = 'mongodb+srv://cluster0.n4fxvug.mongodb.net/?authSource=%24external&authMechanism=MONGODB-X509&retryWrites=true&w=majority';
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 // const fs = require('fs');
 
-const credentials = '/Users/sac/Sites/library/mongo/X509-cert-7010500130319648579.pem' //'<path_to_certificate>'
+const credentials = '/Users/sac/Sites/library/mongo/X509-cert-2850629020587907996.pem' //'<path_to_certificate>'
 const client = new MongoClient('mongodb+srv://cluster0.n4fxvug.mongodb.net/?authSource=%24external&authMechanism=MONGODB-X509&retryWrites=true&w=majority', {
   sslKey: credentials,
   sslCert: credentials,
@@ -88,15 +128,15 @@ async function runMongoLoader() {
 
 
 
-
+const ping_timer = timer('ping_timer').start();
 runMongoLoader().then(res=>runServer(res));
 
 function runServer(mongo_data){
     console.log('Express is serving from', distDir);
     mongo_data.forEach(obj => {
-        console.log(`Collection "${obj.name}" contains (${obj.count}) documents.`);
+        console.log(`Collection-z "${obj.name}" contains (${obj.count}) documents.`);
     });
-
+    console.log(formatMs(ping_timer.stop()));
     // Initialize the app.
     var server = app.listen(process.env.PORT || LOCAL_PORT, function () {
         var port = server.address().port;
@@ -106,10 +146,79 @@ function runServer(mongo_data){
 
 
 
+/*  "/api/search"
+ *  GET: finds some communications
+ */
+app.get("/api/search/:term", function (req, res) {
+    coms_collection.aggregate([ { 
+        $search: {
+            index: "coms-text",
+            text: {
+                query: `${req.params.term}`,
+                path: {
+                    wildcard: "*"
+                }
+            }
+        }
+    } ])
+    .sort( { time: -1 } ).toArray().then(response => {
+        res.status(200).json(response);
+    });
+});
+
+/*  "/api/search"
+ *  GET: finds some communications
+ */
+app.get("/api/phrases-short", function (req, res) {
+    coms_collection.find({state: "association-phrase"})
+    .sort( { time: -1 } ).toArray().then(response => {
+        response = response.map((r) => r.object?[r.text, r.object.products?.map((p) => p[1])].join('-'):null)
+        .filter((r) => r !== null);
+        res.status(200).json(response);
+    });
+});
+
+
+app.get("/api/product-local-ids", function (req, res) {
+    products_collection.find({}).toArray().then(response => {
+        response = response.map((r) => r.id?[r._id,r.int,r.id,r.name,r.brand].join(' '):null)
+        .filter((r) => r !== null);
+        res.status(200).json(response);
+    });
+});
+
+app.get("/api/coms-x-product/:localId", function (req, res) {
+    // sweet baby jesus. {from_id: req.params.localId},
+    ping_timer.start();
+
+    coms_collection.find({$or:[
+        {'from_id': req.params.localId},
+        {'object.products':{$elemMatch:{$elemMatch:{$in:[req.params.localId]}}}}
+    ]})
+    .sort( { time: -1 } ).toArray().then(response => {
+        const ca = {'phrases':[],'system':[]};
+        response.forEach((r) => (r.state === "association-phrase" && ca.phrases.push(r)) || (ca.system.push(r)))
+        ca.time = formatMs(ping_timer.stop());
+        res.status(200).json(ca);
+    });
+});
 
 
 
-
+// //db.stores.find( { $text: { $search: "java coffee shop" } } )
+// [
+//     {
+//       $search: {
+//         index: "coms-text",
+//         text: {
+//           query: req.params.term,
+//           path: {
+//             wildcard: "*"
+//           }
+//         }
+//       }
+//     }
+//   ]
 
 /*  "/api/coms"
  *  GET: finds all communications
@@ -198,7 +307,47 @@ app.post("/api/modify/:id", function (req, res) {
 });
 
 
+/*
 
+db.collection.bulkWrite( [
+   { updateOne :
+      {
+         "filter": <document>,
+         "update": <document or pipeline>,            // Changed in 4.2
+         "upsert": <boolean>,
+         "collation": <document>,                     // Available starting in 3.4
+         "arrayFilters": [ <filterdocument1>, ... ],  // Available starting in 3.6
+         "hint": <document|string>                    // Available starting in 4.2.1
+      }
+   }
+] )
+
+*/
+            // updateOne : {
+            //     "filter": {_id: new ObjectId(r._id)}
+            //     "update": {$set:{["children"]: r.children, ["children"]: r.children}}
+            //     products_collection.updateOne({_id: new ObjectId(req.params.id)}, {$set:{["children"]: r.children}})
+
+app.post("/api/set-assoc", function (req, res) {
+    var bulk = req.body; //array of parts
+    const write_groups = [];
+    bulk.map((r)=>{
+        r._id = new ObjectId(r._id);
+        const job = {
+            replaceOne :{
+                "filter": {_id: new ObjectId(r._id)},
+                "replacement": r
+            }
+        }
+        write_groups.push(job);
+    })
+    products_collection.bulkWrite(write_groups)
+    .then(response => {
+        res.status(200).json(response);
+    });
+
+
+});
 
 /*  "/api/products/:id"
  *   POST: updates product by id

@@ -1,4 +1,4 @@
-import { PartsOfSpeech } from 'src/app/product/product-create-form/product-create-form.component'
+import { PartsOfSpeech } from 'src/app/product/product-create/product-create.component'
 import { Md5 } from 'ts-md5';
 
 export const get_id = (seed: string, len:number): string => {
@@ -51,6 +51,7 @@ export class TopDefinition implements ITopDefinition{
         const fresh = this.meanings?.map((m:any, i:number) => {
 
             const meaning_defs = m.definitions?.map((d:any, i:number) => {
+                console.log('error', d);
                 return new Definition(
                     d.definition, 
                     d.example, 

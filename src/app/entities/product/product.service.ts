@@ -4,13 +4,17 @@ import { IProduct, Product } from './product.model';
 import { firstValueFrom } from 'rxjs';
 import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { TopDefinition, Meaning, Definition } from 'src/app/entities/meaning/meaning.model';
-import { PartsOfSpeech } from 'src/app/product/product-create-form/product-create-form.component'
-// import { ObjectId } from 'mongodb';
+import { PartsOfSpeech } from 'src/app/product/product-create/product-create.component'
+
+export const dtf = (obj:object | {}, arr:any | []) => {
+	Object.entries(obj).forEach(([key, val]) => 
+		(val && typeof val === 'object') && (arr.push({id:key, v:(dtf(val, []) as [])})) || arr.push(val));
+	return arr
+}
 
 @Injectable({
     providedIn: 'root'
 })
-
 export class ProductService {
     
     constructor(public http: HttpClient) { }
@@ -59,9 +63,43 @@ export class ProductService {
         return output_def;
     }
 
+
+    async defineAndSaveSelected(product: IProduct):Promise<void | IProduct>{
+        let def:[]|any = [];
+        const product_z = this.define(product.name)
+        .then((result: any) => {
+            if(Array.isArray(result[0].raw)){
+                //definition exists
+                product.def = this.prepareDef(result[0].raw, true) as [];
+                product.object = product.def?.map((d:TopDefinition) => d.id);
+            }else{
+                //no definition exists
+                product.def = [new TopDefinition(product.name,[])];
+                product.object = product.def[0].id;
+            }
+            this.prepareProductMeta(product);
+            return product;
+        })
+        .then(async (product: IProduct) => {
+            def = product.def;
+            return await this.create(product);
+        })
+        .then((product: IProduct) => {
+            //wrap up: zip def back in after creation.
+            product.def = def;
+            this.prepareProductMeta(product);
+            console.log('finally', product);
+            return product;
+        })
+        .catch(this.error);
+
+        return await product_z;
+    }
+
+
     //set the current working product
     setSelected(product: IProduct | any | null) {
-        console.log('product service:', product);
+        //console.log('product service:', product);
 
         if(product !== null){
             if(product.def && product.def.length === 0){ 
@@ -81,13 +119,14 @@ export class ProductService {
                     }
                     this.prepareProductMeta(product);
                     return this.selectedProduct.next(product);
-                    
                 }).catch(this.error);
+
             }else if(!product.def){
                 console.log("not a new entry, get existing lookup definition...");
                 this.get_definitions(product)
                 .then((result: any) =>{
                     product.real = true;
+                    console.log('hot mess', result, product);
                     product.def = result[0].definition;
                     product.object = product.def.map((d:TopDefinition) => d.id);
                     this.prepareProductMeta(product);
@@ -128,13 +167,21 @@ export class ProductService {
             .then((response : IProduct | any | null) => response)
             .catch(this.error);
         }
+    
+    public async set_assoc(products:IProduct[]){
+        const req = this.http.post(`/api/set-assoc`, products);
+        return await firstValueFrom(req)
+            .then((response : IProduct | any | null) => response)
+            .catch(this.error);
+        }
 
-
-    public async create(product: Product){
+    public async create(product: Product | IProduct){
         product.object = undefined;
+        let def = product.def;
         const req = this.http.post(this.productsUrl, product);
         return await firstValueFrom(req)
             .then((response : IProduct | any | null) => {
+                response.def = def;
                 this.productInventory = this.currentInventory.getValue();
                 this.productInventory.push(response);
                 this.currentInventory.next(this.productInventory);
@@ -163,6 +210,15 @@ export class ProductService {
             .then((response: any) => response)
             .catch(this.error);
         }
+
+    public async get_coms(product: IProduct){
+        if(!product.id) return null;
+        const req = this.http.get(`/api/coms-x-product/${product.id}`);
+        return await firstValueFrom(req)
+            .then((response: any) => response)
+            .catch(this.error);
+        }
+        
         
     // Error handling
     private error(error: any) {

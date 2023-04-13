@@ -49,6 +49,9 @@ export class CommunicationsService {
   private comsCurrent = new BehaviorSubject<ICom>(this.coms_object as any);
   coms_obs = this.comsCurrent.asObservable();
 
+  // public comsState = new BehaviorSubject<String>('initial-state' as any);
+  coms_state:string = 'initial-state';//this.comsState.asObservable();
+
   log_delta = new Date().getTime();
 
   public async get() {
@@ -75,6 +78,11 @@ export class CommunicationsService {
     console.error(message);
   }
 
+  state(state:string | null = null):string{
+    if(state) this.coms_state = state;
+    return this.coms_state;
+  }
+
   log(message: string | string[], alts:any = undefined) {
     this.coms_object.level = 'log';
     this.coms_object.icon = 'message';
@@ -93,9 +101,10 @@ export class CommunicationsService {
     this.coms_object.time = time; 
 
     this.com = new Com();
+    
     Object.assign(this.com, this.coms_object);
-    this.create(this.com);
-    console.log(this.com);
+
+    if(this.coms_object.level === 'log') this.create(this.com);
     
     this.comsCurrent.next(this.com);
     

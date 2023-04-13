@@ -47,6 +47,7 @@ export class ProductTraverseComponent implements OnInit, AfterContentInit {
   stateGroups: StateGroup[] = [];
   // inputControl: FormControl | any;
   productInputControl = new FormControl([null]);
+  lexInputControl = new FormControl([null]);
 
   stateGroupOptions: Observable<StateGroup[]> | any;
 
@@ -63,7 +64,7 @@ export class ProductTraverseComponent implements OnInit, AfterContentInit {
   }
 
   stateForm = this._formBuilder.group({
-    stateGroup: [null] //, { validators:[ Validators.required, Validators.minLength(4)]}],
+    stateGroup: [null], //, { validators:[ Validators.required, Validators.minLength(4)]}],
   });
 
   // formControl = new FormControl(['angular']);
@@ -124,7 +125,6 @@ export class ProductTraverseComponent implements OnInit, AfterContentInit {
     this.product_list = products;
     //this.logger.ez.set_text(JSON.stringify(this.product_list, null, '\t'), true);
     this.populateProductsAlphabetized();
-
 
     this.stateGroupOptions = this.productInputControl.valueChanges.pipe(
       startWith(null),

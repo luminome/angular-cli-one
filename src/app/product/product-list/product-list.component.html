@@ -11,26 +11,77 @@
   </form>
   <!-- matTooltip="{{def.id}}"  -->
   <div [style.display]="['none','block'][+(currentView === 'timeline')]">
+    
+   
+
     <mat-card>
-      <div>
-        <div class="time-container">      
-          <div class="time-row" *ngFor="let i = index; let state of stateGroups">
+      <div class="time-container">
+
+        <div #timeSeriesOne id="column-one" class="time-column">      
+          <div id="bounds_marker" class="bounds master">what</div>
+          <div id="par_marker" class="marker"></div>
+          <div class="time-row" *ngFor="let i = index; let state of stateGroups" [id]="'ts'+i"
+          (click)="getProductComs($event, state, i)">
+            
             <div [style.height]="(state.delta_ms+24)+'px'">
               <div class="time-index">
-                {{i}}&nbsp;
+                <strong>{{i}}</strong>
+                {{state.delta_str}}
               </div>
               <svg class="time-marker" viewBox="0 0 32 32" >
                 <polygon class="svg-hexagon" points="4.4,9.3 4.4,22.7 16,29.4 27.6,22.7 27.6,9.3 16,2.6 "/>
               </svg>
             </div>
+            <svg class="time-curve" viewBox="0 0 100 500">
+              <g><path class="path" d=""/></g>
+            </svg>
             <div>
               <div class="time-label">
                 {{state.product.name}}
-                {{state.delta_str}}
-                {{state.delta_ms}}
               </div>
             </div>
+          
+
+
           </div>
+        </div>
+
+        
+
+        <div #timeSeries class="time-column spec" watchDomTree (dom-changed)="handleDomChange($event)">   
+          
+          <div id="chi_marker" class="marker"></div>   
+          <!-- //[class]="'time-row time-row-spec' + (state.coms ? ' time-row-open':'')"  + (state.coms ? ' time-row-open':'')-->
+          <!-- [style.top]="state.coms_position+'px'"  -->
+          <div *ngFor="let i = index; let state of stateGroups" [id]="'s'+i" data-bounds="null" [class]="'time-row-spec'" KCond>
+            
+            <span *ngIf="state.coms"><strong>{{ state.product.name.toUpperCase() }}</strong>&nbsp;{{ state.coms['time'] }}</span>
+            <div *ngIf="state.coms">
+              <div *ngFor="let i = index; let child of state.product.children">
+                —&gt;&nbsp;{{ child[0] }}<span>.({{child[1]}})</span> 
+              </div>
+              <div *ngFor="let i = index; let parent of state.product.parents">
+                &lt;—&nbsp;{{ parent[0] }}<span>.({{parent[1]}})</span>
+              </div>
+
+
+            
+              <div class="phrases" *ngIf="state.coms['phrases'].length">
+                <!-- <span>{{i}}&nbsp;"{{state.product.name}}" Phrases:</span> -->
+                <div *ngFor="let i = index; let phrase of state.coms['phrases']">
+                  <app-coms-solo [com]="phrase"></app-coms-solo>
+                </div>
+              </div>
+              <div class="system" *ngIf="state.coms['system'].length">
+                <!-- <span>System:</span> -->
+                <div *ngFor="let i = index; let phrase of state.coms['system']">
+                  <app-coms-solo [com]="phrase"></app-coms-solo>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
         </div>
       </div>
     </mat-card>

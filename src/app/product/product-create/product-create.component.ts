@@ -17,6 +17,8 @@ export const PartsOfSpeech = [
   {val:'pron', txt:'Pronoun', id:6},
   {val:'prep', txt:'Preposition', id:7},
   {val:'num', txt:'Numeral', id:8},
+  {val:'ct', txt:'Contraction', id:9},
+  {val:'det', txt:'Determiner', id:10},
 ];
 
 export const ProductFieldNames = {
@@ -26,9 +28,9 @@ export const ProductFieldNames = {
 }
 
 @Component({
-  selector: 'app-product-create-form',
-  templateUrl: './product-create-form.component.html',
-  styleUrls: ['./product-create-form.component.css']
+  selector: 'app-product-create',
+  templateUrl: './product-create.component.html',
+  styleUrls: ['./product-create.component.css']
 })
 export class ProductCreateFormComponent implements OnInit, OnDestroy {
   public now = new Date();
@@ -144,7 +146,6 @@ export class ProductCreateFormComponent implements OnInit, OnDestroy {
 
       this.productCreateForm.patchValue(product);
       
-
       const exists = this.products.filter((m: IProduct) => m.name === product.name);
       this.postMethodState = this.postMethodStates[+(exists.length === 0)];
       if(exists){
@@ -153,6 +154,12 @@ export class ProductCreateFormComponent implements OnInit, OnDestroy {
       }
 
       this.product = product;
+
+      if(this.coms.state() === 'add-word-automated'){
+        this.coms.state('submitted');
+        this.onSubmit();
+      }
+
       this.logger.ez.set_text(`create_form serviceSelectedProduct: ${product !== null ? product.name : null}`, true);
     }else{
       this.productCreateForm.reset();
@@ -222,8 +229,13 @@ export class ProductCreateFormComponent implements OnInit, OnDestroy {
     }else{
 
       this.productService.modify(this.product._id, this.product)
-      .then((result: Product | any) => {
+      .then((result: any) => { //confirmation of modify only
         console.log(result);
+
+        this.coms.log(`modified: "${this.product.name} (.${this.product.brand})"`,
+        {'icon':'check_circle_outline','state':`product-create-modify`,'object':result, 'from_id':this.product.id});
+
+        this.productService.setSelected(this.product);
       })
 
     }

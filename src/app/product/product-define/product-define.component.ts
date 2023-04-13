@@ -3,7 +3,7 @@ import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { IProduct, Product } from 'src/app/entities/product/product.model';
 import { TextService } from "src/app/shared/text.service";
 import { ITopDefinition, TopDefinition, IMeaning, Meaning, IDefinition, Definition, get_id } from 'src/app/entities/meaning/meaning.model';
-import { PartsOfSpeech, ProductFieldNames } from 'src/app/product/product-create-form/product-create-form.component'
+import { PartsOfSpeech, ProductFieldNames } from 'src/app/product/product-create/product-create.component'
 import { MatButtonToggleChange } from '@angular/material/button-toggle';
 import { Subscription } from 'rxjs';
 import { ProductService } from 'src/app/entities/product/product.service';
@@ -254,7 +254,7 @@ export class ProductDefineComponent implements OnChanges, OnInit, AfterViewInit
         this.productDefineForm.controls['posSelect'].setValue(def_pos);
         this.coms.log(`"${defined.txt}(.${defined.val})" already exists within definition (${toDefNumber.i+1}).`, {'state':'define-meaning-defined','icon':'warning'});
       }else{
-        this.coms.log(`define new "${event.source.value.txt}(.${event.source.value.val})" on definition (${toDefNumber.i+1}).`, {'state':'define-meaning','icon':'check_circle_outline'});
+        this.coms.log(`define new "${event.source.value.txt}(.${event.source.value.val})" on definition (${toDefNumber.i+1}). of "${this.product.name}".`, {'state':'define-meaning','icon':'check_circle_outline'});
 
         const topDef = this.product.def.filter((d:any) => d.id === this.editorTopDefinition)[0];
         const meaning = new Meaning(event.source.value, [new Definition('Undefined')]);
@@ -296,7 +296,7 @@ export class ProductDefineComponent implements OnChanges, OnInit, AfterViewInit
     if (index >= 0) {
       topDef.meanings.splice(index, 1);
     }
-    this.coms.log(`removed "${meaning.partOfSpeech['txt']}(.${meaning.partOfSpeech['val']})" on definition (${toDefNumber.i+1}).`, {'state':'delete-meaning','icon':'block'});
+    this.coms.log(`removed "${meaning.partOfSpeech['txt']}(.${meaning.partOfSpeech['val']})" on definition (${toDefNumber.i+1}) of "${this.product.name}".`, {'state':'delete-meaning','icon':'block'});
 
     this.productService.setSelected(this.product);
   }

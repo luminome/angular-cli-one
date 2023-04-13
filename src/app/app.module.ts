@@ -1,4 +1,4 @@
-import { NgModule, importProvidersFrom } from '@angular/core';
+import { NgModule, importProvidersFrom, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { ProductComsComponent } from './product/product-coms/product-coms.component';
 import { ProductListComponent } from './product/product-list/product-list.component';
@@ -12,7 +12,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { ProductCreateFormComponent } from './product/product-create-form/product-create-form.component';
+import { ProductCreateFormComponent } from './product/product-create/product-create.component';
 import { MatFormFieldModule, MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
@@ -34,7 +34,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { DomChangedDirective } from './dom.changed.directive';
 import { ComSoloComponent } from './coms/com-solo/com-solo.component';
-
+import { ProductAssocComponent } from './product/product-assoc/product-assoc.component';
 
 
 @NgModule({
@@ -47,6 +47,7 @@ import { ComSoloComponent } from './coms/com-solo/com-solo.component';
     DomChangedDirective,
     ProductComsComponent,
     ComSoloComponent,
+    ProductAssocComponent,
   ],
   imports: [
     BrowserModule,
@@ -75,7 +76,7 @@ import { ComSoloComponent } from './coms/com-solo/com-solo.component';
     MatTooltipModule
   ],
 
-
+  schemas: [ CUSTOM_ELEMENTS_SCHEMA ],
 
   providers: [
     { provide: MAT_MOMENT_DATE_ADAPTER_OPTIONS, useValue: { useUtc: true } },
