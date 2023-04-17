@@ -47,11 +47,12 @@ export class TopDefinition implements ITopDefinition{
     // or making parsed of existing FileSystemEntry;
 
     public populateBase(): void{
-        const pos_filter = (pos: string) => PartsOfSpeech.filter(p => p.txt.toLowerCase() === pos.toLowerCase())[0] || null;
+        const pos_filter = (pos: string) => PartsOfSpeech.filter((p:any) => p.txt.toLowerCase() === pos.toLowerCase())[0] || null;
         const fresh = this.meanings?.map((m:any, i:number) => {
 
             const meaning_defs = m.definitions?.map((d:any, i:number) => {
                 console.log('error', d);
+
                 return new Definition(
                     d.definition, 
                     d.example, 
@@ -60,13 +61,17 @@ export class TopDefinition implements ITopDefinition{
                     d.id);
             });
 
+            
+            console.log(m);
             return new Meaning(
                 typeof m.partOfSpeech !== 'object' ? pos_filter(m.partOfSpeech) : m.partOfSpeech,
                 meaning_defs || [],
                 m.synonyms, // && m.synonyms !== undefined ? m.synonyms[0].split(',') : undefined,
                 m.antonyms, // && m.antonyms !== undefined ? m.antonyms[0].split(',') : undefined,
                 m.id);
-        })
+        });
+
+        console.log(fresh);
         this.meanings = fresh;
     }
 }

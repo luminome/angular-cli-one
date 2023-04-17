@@ -272,7 +272,7 @@ app.post("/api/products", function (req, res) {
     } else if (!product.brand) {
         manageError(res, "Invalid product input", "Brand is mandatory.", 400);
     } else {
-        const def_entry = {'name':product.name,'definition':product.def};
+        const def_entry = {'name':product.name, 'definition':product.def};
         delete product.def;
         products_collection.insertOne(product)
         .then(response => {
@@ -333,6 +333,7 @@ app.post("/api/set-assoc", function (req, res) {
     const write_groups = [];
     bulk.map((r)=>{
         r._id = new ObjectId(r._id);
+        delete r.def;
         const job = {
             replaceOne :{
                 "filter": {_id: new ObjectId(r._id)},
@@ -345,8 +346,6 @@ app.post("/api/set-assoc", function (req, res) {
     .then(response => {
         res.status(200).json(response);
     });
-
-
 });
 
 /*  "/api/products/:id"

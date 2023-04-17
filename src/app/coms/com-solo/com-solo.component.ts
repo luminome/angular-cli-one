@@ -10,6 +10,8 @@ import { ICom } from 'src/app/entities/com/com.model';
 export class ComSoloComponent{
   constructor() { }
   @Input() com: ICom | any | null;
+  @Input() class: string | any | null;
+  
   detail_on: boolean = false;
   detail_body: string | null = null;
 

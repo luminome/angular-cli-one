@@ -19,6 +19,7 @@ export const PartsOfSpeech = [
   {val:'num', txt:'Numeral', id:8},
   {val:'ct', txt:'Contraction', id:9},
   {val:'det', txt:'Determiner', id:10},
+  {val:'pn', txt:'Proper Noun', id:11},
 ];
 
 export const ProductFieldNames = {
@@ -138,9 +139,9 @@ export class ProductCreateFormComponent implements OnInit, OnDestroy {
 
       if(this.product === null && this.coms.coms_object.state === 'create-define'){
         if(product.real){
-          this.coms.log(`"${product.name}" exists in the dictionary.`, {'state':'create-existing','from_id':product.id, 'object':product.object});
+          this.coms.log(`"${product.name}" exists in the dictionary.`, {'level':'info', 'state':'create-existing','from_id':product.id, 'object':product.object});
         }else{
-          this.coms.log(`"${product.name}" appears to be a new word. You will need to define it.`, {'icon':'warning','state':'create-new','from_id':product.id, 'object':product.object});
+          this.coms.log(`"${product.name}" appears to be a new word. You will need to define it.`, {'level':'info', 'icon':'warning','state':'create-new','from_id':product.id, 'object':product.object});
         }
       }
 
@@ -219,7 +220,7 @@ export class ProductCreateFormComponent implements OnInit, OnDestroy {
           this.error = false;        
           //this.showNotify(`Added entry for "${result.name}".`);
 
-          this.coms.log(`added "${result.name}" to inventory.`, {'from_id':result.id});
+          this.coms.log(`manually added "${result.name}" to inventory.`, {'from_id':result.id});
 
           this.productCreateForm.reset();
           this.productService.setSelected(result);
@@ -250,7 +251,7 @@ export class ProductCreateFormComponent implements OnInit, OnDestroy {
 
     if(exists.length > 0){
       this.coms.log(`The name "${exists[0].name}" already exists in the inventory.`, 
-        {'icon':'warning','state':'create-exists','from_id':exists[0].id});
+        {'level':'info', 'icon':'warning','state':'create-exists','from_id':exists[0].id});
 
         this.productCreateForm.controls['name'].setErrors({'nomatch': true});
       return;
@@ -263,7 +264,7 @@ export class ProductCreateFormComponent implements OnInit, OnDestroy {
       this.productCreateForm.controls['name'].setErrors(null);
       this.buildingProduct = new Product(this.products.length, name_value, [], new Date(), false, false);
       this.coms.log(`seeking definition for "${name_value}"...`, 
-        {'icon':'warning','state':'create-define','from_id':this.buildingProduct.id});
+        {'level':'info', 'icon':'warning','state':'create-define','from_id':this.buildingProduct.id});
       this.productService.setSelected(this.buildingProduct);
     }else{
       this.productCreateForm.controls['name'].setErrors({'nomatch': true});

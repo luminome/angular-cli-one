@@ -33,6 +33,8 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatListModule } from '@angular/material/list';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { DomChangedDirective } from './dom.changed.directive';
+import { LoaderDirective } from './editor.detail.directive';
+
 import { ComSoloComponent } from './coms/com-solo/com-solo.component';
 import { ProductAssocComponent } from './product/product-assoc/product-assoc.component';
 
@@ -45,6 +47,7 @@ import { ProductAssocComponent } from './product/product-assoc/product-assoc.com
     ProductTraverseComponent,
     ProductDefineComponent,
     DomChangedDirective,
+    LoaderDirective,
     ProductComsComponent,
     ComSoloComponent,
     ProductAssocComponent,

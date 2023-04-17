@@ -64,6 +64,9 @@ export class ProductService {
     }
 
 
+
+
+
     async defineAndSaveSelected(product: IProduct):Promise<void | IProduct>{
         let def:[]|any = [];
         const product_z = this.define(product.name)
@@ -96,6 +99,17 @@ export class ProductService {
         return await product_z;
     }
 
+    
+    async getProductDefinition(product: IProduct){
+        return this.get_definitions(product)
+        .then((result: any) =>{
+            product.def = result[0].definition;
+            product.object = product.def!.map((d:TopDefinition) => d.id);
+            this.prepareProductMeta(product);
+            return true;
+        }).catch(this.error);
+    }
+
 
     //set the current working product
     setSelected(product: IProduct | any | null) {
@@ -126,7 +140,7 @@ export class ProductService {
                 this.get_definitions(product)
                 .then((result: any) =>{
                     product.real = true;
-                    console.log('hot mess', result, product);
+                    // console.log('hot mess', result, product);
                     product.def = result[0].definition;
                     product.object = product.def.map((d:TopDefinition) => d.id);
                     this.prepareProductMeta(product);
@@ -175,7 +189,7 @@ export class ProductService {
             .catch(this.error);
         }
 
-    public async create(product: Product | IProduct){
+    public async create(product: IProduct){
         product.object = undefined;
         let def = product.def;
         const req = this.http.post(this.productsUrl, product);

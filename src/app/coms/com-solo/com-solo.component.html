@@ -1,4 +1,4 @@
-<div class="coms-element" (click)="detail()">
+<div [class]="class+' coms-element'" (click)="detail()">
     <div><mat-icon *ngIf="com.icon" color="primary">{{ com.icon }}</mat-icon></div>
     <div>
         <div class="coms-text" *ngFor="let i = index; let text of com.text">{{ text }}</div>

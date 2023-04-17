@@ -53,6 +53,9 @@ export interface StateGroup {
   delta_ms: number;
   coms?: {} | undefined;
   coms_position?: number | undefined;
+  dom_par?: HTMLElement;
+  dom_chi?: HTMLElement;
+  state?:boolean;
 }
 
 export interface PeriodicElement {
@@ -92,18 +95,21 @@ export class ProductListComponent implements OnInit, OnChanges, OnDestroy {
   ListViews: [] | any = ['table','timeline'];
 
   @ViewChild(MatSort) sort!: MatSort;
-  // @Output() selectedProduct = new EventEmitter<IProduct>();
+  @Output() selectedProduct:any | null = new EventEmitter<HTMLElement>();
   // @Input() productToDisplay: IProduct | any;
 
   inventoryDataArray = new MatTableDataSource<IProduct>();
 
   // productSubscription: Subscription | any;
   serviceSelectedProduct: IProduct | any | null;
-  currentView: string | any = 'timeline';
+  currentView: string | any = 'table';
 
   viewSelectForm = this._formBuilder.group({
-    view: new FormControl('timeline'),
+    view: new FormControl('table'),
   });
+
+  public loading = true;
+  
 
   constructor(
     protected productService: ProductService, 
@@ -168,7 +174,8 @@ export class ProductListComponent implements OnInit, OnChanges, OnDestroy {
       const delta = p_time - pre_time > 0 ? p_time - pre_time : 0;
       const delta_str = formatMs(delta);
       deltas.push(delta);
-      this.logger.ez.set_text(`${this.products[i].name} ${delta_str}`, true);
+
+      //this.logger.ez.set_text(`${this.products[i].name} ${delta_str}`, true);
       
       const r_part = {
         'letter': this.products[i].name.substring(0,1),
@@ -192,6 +199,21 @@ export class ProductListComponent implements OnInit, OnChanges, OnDestroy {
 
 
   getProductComs(event: any, product:StateGroup, index:number){
+
+    
+    
+    product.state = !product.state;
+
+    if(product.product && !product.product.def){
+      this.productService.getProductDefinition(product.product)
+      .then((def_prod:boolean|void) => {
+        
+        console.log('getProductComs', def_prod, product);
+      });
+    };// return;
+
+    // return;
+
     const open_items = [...this.timeSeriesOne.nativeElement.querySelectorAll('.time-row-select')];
     open_items.forEach((o:HTMLElement) => o.classList.remove('definitive'));
 
@@ -215,7 +237,7 @@ export class ProductListComponent implements OnInit, OnChanges, OnDestroy {
 
     const open_child = document.getElementById('s'+index);
     open_child?.classList.toggle('time-row-open');
-    open_child?.classList.add('relevant');
+    // open_child?.classList.add('relevant');
 
     if(open_child?.matches('.time-row-open')){
       const vpos = caller_now?.offsetTop;
@@ -281,9 +303,8 @@ export class ProductListComponent implements OnInit, OnChanges, OnDestroy {
             a.offsetTop - b.getBoundingClientRect().height,
             a.offsetTop + a.getBoundingClientRect().height
           ][+(direction !== 'up')];
+
           b.setAttribute('data-moved', '1');
-          
-          
           b['style'].top = (offset+(this.conf.margin*dir))+'px';
 
 
@@ -297,7 +318,20 @@ export class ProductListComponent implements OnInit, OnChanges, OnDestroy {
 
 
   handleDomChange(event: any|null) {
+
+
+    const wraps = [...this.timeSeries.nativeElement.querySelectorAll('.system-wrapper')];
+    wraps.forEach((h:HTMLElement) =>{
+      // const ht = h.getBoundingClientRect().height;
+      const fc = h.firstElementChild?.getBoundingClientRect().height;
+      if(fc) h['style'].height = (fc) + 'px';
+    });
+
+
     const open_items = [...this.timeSeries.nativeElement.querySelectorAll('.time-row-open')];
+    const open_rows = [...this.timeSeriesOne.nativeElement.querySelectorAll('.time-row-select')];
+    const col_width = document.getElementById('column-one')?.getBoundingClientRect().width;
+
     for(let i=0; i < open_items.length; i++){
       const el = open_items[i];
       el.setAttribute('data-moved', 0);
@@ -309,39 +343,34 @@ export class ProductListComponent implements OnInit, OnChanges, OnDestroy {
       const par = document.getElementById('t'+el.id);
       if(par){
         el.setAttribute('data-pos', par.offsetTop);
-        el['style'].background = 'var(--bg)';
-
+        // el['style'].background = 'var(--bg)';
         if(par.matches('.definitive')){
-          el['style'].background = 'aqua';
+          // el['style'].background = 'aqua';
           el.dataset['moved'] = '0';
         }
-
         if(el.dataset['moved'] === '0') el['style'].top = par.offsetTop + 'px';
-
       }
 
       this.handleList(open_items, i, 'up');
       this.handleList(open_items, i, 'down');
-
-
     }
 
 
-    const col_width = document.getElementById('column-one')?.getBoundingClientRect().width;
+    
     const w = 120;
     const opy = 0;
-    const tension = 20;
+    const tension = 40;
     const t1 = w-tension;
     const t2 = tension;
 
-    const open_rows = [...this.timeSeriesOne.nativeElement.querySelectorAll('.time-row-select')];
+    
     for(let ni=0; ni < open_rows.length; ni++){
       const par = open_rows[ni];
       const cid = par.id.substring(1,par.id.length);
       const chi = document.getElementById(cid);
       const curve = par?.querySelector('.time-curve');
 
-      if(par && chi && curve){
+      if(chi && curve){
         const n_rect = chi.getBoundingClientRect();
         const p_rect = par.getBoundingClientRect();
 
@@ -592,13 +621,25 @@ export class ProductListComponent implements OnInit, OnChanges, OnDestroy {
   }
 
 
-  setProductSelection(element: IProduct | null): void{
+  setProductSelection(element: IProduct | null, event:any): void{
+    //console.log(event.target.parentNode.nextElementSibling);
+
     if(element !== null){
+
+      if(element && !element.def){
+        this.productService.getProductDefinition(element)
+        .then((def_prod:boolean|void) => console.log(def_prod));
+      };
+
+
+
+      this.selectedProduct.emit(event.target.parentNode.nextElementSibling);
       this.product = element;
-      this.coms.log(`selected: "${element.name}"`, {'state':`product-list-selected`, 'from_id':element.id});
+      this.coms.log(`selected: "${element.name}"`, {'level':'info', 'state':`product-list-selected`, 'from_id':element.id});
       this.productService.setSelected(this.product);
     }else{
-      this.coms.log(`deselected: "${this.product.name}"`, {'state':`product-list-deselected`, 'from_id':this.product.id});
+      this.selectedProduct.emit(null);
+      this.coms.log(`deselected: "${this.product.name}"`, {'level':'info', 'state':`product-list-deselected`, 'from_id':this.product.id});
       this.product = null;
       this.productService.setSelected(null);
     }

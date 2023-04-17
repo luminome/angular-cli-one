@@ -1,147 +1,141 @@
-<!-- WHAT {{ message }} -->
-<!-- [(ngModel)]="selectedPartsOfSpeech"  -->
-<section>
-    <mat-card *ngIf="showDefs">
-        <form class="form" [formGroup]="productDefineForm" (ngSubmit)="onSubmit()" (keydown.enter)="$event.preventDefault()">
-            <div #lineEditorAttributes class="line-editor-attributes" placeholder="Your favorite sea creature">
-                {{editorTarget}}
-                <div class="editor-add-item" *ngFor="let d = index; let item of editor.attributes_available">
-                    <div><button mat-icon-button class="delete" aria-label="Add Definition" (click)="formAddItemAttribute($event, item)">
-                        <mat-icon color="primary">add</mat-icon>
-                    </button></div>
-                    <div><div class="editor-label">{{ item }}</div></div>
-                </div>
+<mat-card *ngIf="showDefs" class="def-module">
+    <form class="form" [formGroup]="productDefineForm" (ngSubmit)="onSubmit()" (keydown.enter)="$event.preventDefault()">
+        <div *ngIf="definitionsEditMode" #lineEditorAttributes class="line-editor-attributes" placeholder="Your favorite sea creature">
+            {{editorTarget}}
+            <div class="editor-add-item" *ngFor="let d = index; let item of editor.attributes_available">
+                <div><button mat-icon-button class="delete" aria-label="Add Definition" (click)="formAddItemAttribute($event, item)">
+                    <mat-icon color="primary">add</mat-icon>
+                </button></div>
+                <div><div class="editor-label">{{ item }}</div></div>
             </div>
-            <div #lineEditorField>
-                <mat-form-field appearance="fill" class="editor-field-full-width">
-                    <mat-label>Definition {{editor.attribute}}</mat-label>
-                    <input matInput required [value]="editor.value" formControlName="lineEditorField" placeholder="{{editor.attribute}} will be deleted." (keyup.enter)="lineEditorChangeValue($event)" (change)="lineEditorChangeValue($event)">
-                    <button *ngIf="editor.value" matSuffix mat-icon-button aria-label="Clear" (click)="editor.value=''">
-                        <mat-icon>close</mat-icon>
-                    </button>
-                    <mat-hint>modify {{editor.attribute}} text.</mat-hint>
-                </mat-form-field>
-            </div>
+        </div>
+        <div #lineEditorField>
+            <mat-form-field appearance="fill" class="editor-field-full-width">
+                <mat-label>Definition {{editor.attribute}}</mat-label>
+                <input matInput required [value]="editor.value" formControlName="lineEditorField" placeholder="{{editor.attribute}} will be deleted." (keyup.enter)="lineEditorChangeValue($event)" (change)="lineEditorChangeValue($event)">
+                <button *ngIf="editor.value" matSuffix mat-icon-button aria-label="Clear" (click)="editor.value=''">
+                    <mat-icon>close</mat-icon>
+                </button>
+                <mat-hint>modify {{editor.attribute}} text.</mat-hint>
+            </mat-form-field>
+        </div>
 
 
-        
+    
+        <!-- [class]="definitionsEditMode ? 'button-editing' : ''"                 [ngClass]="{'button-editing' : definitionsEditMode}"-->
 
-            <mat-card class="product-buttons" *ngIf="showDefs">
-                <mat-button-toggle-group formControlName="defSelect" aria-label="Font Style">
+        <mat-card class="product-buttons" *ngIf="showDefs">
+            <div>
+                <mat-button-toggle-group #defTopLevel formControlName="defSelect" multiple>
                     <mat-button-toggle 
+                    class="def-button" 
                     *ngFor="let def of selectedDefinitions;" 
                     matTooltip="{{def.id}}" 
-                    [value]="def.id">({{def.i+1}}) 
+                    [disabled]="definitionsEditMode && def.id === 'ALL'"
+                    (click)="formSelectDefinition(def, $event); $event.preventDefault();"
+                    [value]="def.id">{{def.label}}
                     </mat-button-toggle>
                 </mat-button-toggle-group>
-                <button mat-icon-button class="delete" aria-label="Add Definition" (click)="formAddTopDefinition()">
+                <button *ngIf="definitionsEditMode" mat-icon-button class="add" aria-label="Add Definition" (click)="formAddTopDefinition()">
                     <mat-icon color="primary">add</mat-icon>
                 </button>
-                <mat-button-toggle-group formControlName="posSelect" aria-label="Font Style" #group="matButtonToggleGroup" (change)="formSelectPartOfSpeech($event)" multiple>
+                <mat-button-toggle-group formControlName="posSelect" #group="matButtonToggleGroup" multiple>
                     <mat-button-toggle 
+                    class="pos-button" 
                     *ngFor="let pos of partsOfSpeech" 
                     matTooltip="{{pos.txt}}" 
+                    (click)="formSelectPartOfSpeech(pos, $event); $event.preventDefault();"
+                    [ngClass]="{'button-editing' : definitionsEditMode}"
                     [value]="pos">.{{pos.val}} 
                     </mat-button-toggle>
                 </mat-button-toggle-group>
-            </mat-card>
+                <button mat-icon-button class="add" aria-label="Add Definition" (click)="setEditMode($event)">
+                    <mat-icon color="primary">{{ ['edit','block'][+definitionsEditMode] }}</mat-icon>
+                </button>
+            </div>
+            <div class="add product-buttons-save" >
+                <button [disabled]="(!definitionsChanged)" mat-button class="add" aria-label="Add Definition" (click)="saveChanges()">
+                    save
+                    <!--   -->
+                </button>
+            </div>
+        </mat-card>
 
-            <div *ngIf="showDefs">
-                <div class="top-def" *ngFor="let d = index; let defx of product.def">
+        <div *ngIf="showDefs">
+            <div class="top-def" *ngFor="let d = index; let defx of product.def">
+                <!-- now this is nested. but why? -->
+                <div class="def-wrapper" *ngIf="defs_filter_.includes(defx.id)">
                     <div class="top-def-header">
                         <div><h2>{{d+1}}.{{defx.word}}</h2></div>
-                        <div>
-                            <button mat-icon-button class="shrink-2x" (click)="formDeleteTopDefinition(defx)" aria-label="Delete completely">
-                                <mat-icon matListItemIcon>delete</mat-icon>
+                        <div *ngIf="definitionsEditMode">
+                            <button mat-icon-button (click)="formDeleteTopDefinition(defx)" aria-label="Delete completely">
+                                <mat-icon color="primary">delete</mat-icon>
                             </button>
                         </div>
-                        
                     </div>
-                    
-                    
+                
                     <div watchDomTree (dom-changed)="handleDomChange($event)" class="meaning has-edit" *ngFor="let meaning of defx.meanings">
+                        <div class="meaning-wrapper" *ngIf="meanings_filter_.includes(meaning.id)">
                         
-                        <div class="meaning-header">
-                            <div><h2>{{ meaning.partOfSpeech.txt }}(.{{ meaning.partOfSpeech.val }})</h2></div>
-                            <div>
-                                <button mat-icon-button class="shrink-2x" (click)="formDeleteMeaning(meaning)" aria-label="Delete completely">
-                                    <mat-icon>delete</mat-icon>
-                                </button>
-                                <button mat-icon-button class="shrink-2x" (click)="formEditLine($event, meaning, defx)" aria-label="Delete completely">
-                                    <mat-icon>edit</mat-icon>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="editor"></div>
-                        <div *ngIf="!hideDefinitions">
-                            <div class="def has-edit" *ngFor="let i = index; let definition of meaning.definitions" KCond>
-                                <div class="def-gutter">
-                                    <button mat-icon-button matTooltip="delete" class="shrink-2x" (click)="formADeleteDefinition(meaning, definition)" aria-label="Delete completely">
-                                        <mat-icon>delete</mat-icon>
+                            <div class="meaning-header">
+                                <div><h2>{{ meaning.partOfSpeech.txt }}(.{{ meaning.partOfSpeech.val }})</h2></div>
+                                <div *ngIf="definitionsEditMode">
+                                    <button mat-icon-button (click)="formDeleteMeaning(meaning, defx)" aria-label="Delete completely">
+                                        <mat-icon color="primary">delete</mat-icon>
+                                    </button>
+                                    <button mat-icon-button (click)="formEditLine($event, meaning, defx)" aria-label="Delete completely">
+                                        <mat-icon color="primary">edit</mat-icon>
                                     </button>
                                 </div>
-                                <div class="def-body">
-                                    <div class="editor"></div>
-                                    <div class="def-part" KCond>
-                                        <div>definition:</div>
-                                        <div class="definition" (click)="formEditLine($event, definition, meaning, 'definition')">{{ definition.definition }}</div>
+                            </div>
+
+                            <div class="editor"></div>
+                            <div *ngIf="!hideDefinitions">
+                                <div class="def has-edit" *ngFor="let i = index; let definition of meaning.definitions" KCond>
+                                    <div *ngIf="definitionsEditMode" class="def-left">
+                                        <button mat-icon-button matTooltip="delete" (click)="formADeleteDefinition(meaning, definition)" aria-label="Delete completely">
+                                            <mat-icon color="primary">delete</mat-icon>
+                                        </button>
                                     </div>
-                                    <div class="def-part" *ngIf="definition.example" KCond>
-                                        <div>example:</div>
-                                        <div class="example" (click)="formEditLine($event, definition, meaning, 'example')">{{ definition.example }}</div>
-                                    </div>
-                                    <div class="def-part" *ngIf="definition.synonyms" KCond>
-                                        <div>synonyms:</div>
-                                        <div class="synonyms" (click)="formEditLine($event, definition, meaning, 'synonyms')">{{ definition.synonyms }}</div>
-                                    </div>
-                                    <div class="def-part" *ngIf="definition.antonyms" KCond>
-                                        <div>antonyms:</div>
-                                        <div class="antonyms" (click)="formEditLine($event, definition, meaning, 'antonyms')">{{ definition.antonyms }}</div>
+                                    <div class="def-body">
+                                        <div class="editor"></div>
+                                        <div class="def-part-main" KCond>
+                                            <!-- <div>definition:</div> -->
+                                            <div class="definition" (click)="formEditLine($event, definition, meaning, 'definition')">{{ definition.definition }}</div>
+                                        </div>
+                                        <div class="def-part" *ngIf="definition.example" KCond>
+                                            <span>example:</span>
+                                            <div class="example" (click)="formEditLine($event, definition, meaning, 'example')">{{ definition.example }}</div>
+                                        </div>
+                                        <div class="def-part" *ngIf="definition.synonyms" KCond>
+                                            <span>synonyms:</span>
+                                            <div class="synonyms" (click)="formEditLine($event, definition, meaning, 'synonyms')">{{ definition.synonyms }}</div>
+                                        </div>
+                                        <div class="def-part" *ngIf="definition.antonyms" KCond>
+                                            <span>antonyms:</span>
+                                            <div class="antonyms" (click)="formEditLine($event, definition, meaning, 'antonyms')">{{ definition.antonyms }}</div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <mat-divider></mat-divider>
+                            <!-- <mat-divider></mat-divider> -->
+                            <div class="meaning-footer">
+                                <div *ngIf="meaning.synonyms" class="def-part" KCond>
+                                    <span>meaning synonyms:</span>
+                                    <div class="synonyms" (click)="formEditLine($event, meaning, defx, 'synonyms')">{{ meaning.synonyms }}</div>
+                                </div>
 
-
-                        <div *ngIf="meaning.synonyms" class="def-part" KCond>
-                            <div>meaning synonyms:</div>
-                            <div class="synonyms" (click)="formEditLine($event, meaning, defx, 'synonyms')">{{ meaning.synonyms }}</div>
-                        </div>
-
-                        <div *ngIf="meaning.antonyms" class="def-part" KCond>
-                            <div>meaning antonyms:</div>
-                            <div class="antonyms" (click)="formEditLine($event, meaning, defx, 'antonyms')">{{ meaning.antonyms }}</div>
-                        </div>
-
-
-                    </div>
-                    
-                </div>
-            </div>
-
-            
-        </form>
-    </mat-card>
-</section>
-<!-- 
-<mat-card *ngIf="error" role="alert">
-
-        <div><div class="card-label"><strong>Warning! </strong> {{ errorMessage }}</div></div>
-    </mat-card>
-
-<section>
-    <div>
-        <mat-form-field appearance="fill">
-            <mat-label>Name</mat-label>
-            <input matInput required formControlName="name" (change)="formFieldChanged($event)">
-            <mat-hint>Language part</mat-hint>
-        </mat-form-field>
-    </div>
-    <div *ngIf="formState == 'new'">
-        <mat-form-field appearance="fill">
-            <mat-label>Meaning</mat-label>
-            <input matInput formControlName="meaning" (change)="formFieldChanged($event)">
-            <mat-hint>Meaning of word</mat-hint>
-        </mat-form-field>
-    </div> -->
+                                <div *ngIf="meaning.antonyms" class="def-part" KCond>
+                                    <span>meaning antonyms:</span>
+                                    <div class="antonyms" (click)="formEditLine($event, meaning, defx, 'antonyms')">{{ meaning.antonyms }}</div>
+                                </div>
+                            </div>
+                            <mat-divider></mat-divider>
+                        </div> <!-- meaning wrapper -->
+                    </div> <!--loop-->
+                </div> <!-- def wrapper -->
+            </div> <!--loop-->
+        </div> 
+        
+    </form>
+</mat-card>

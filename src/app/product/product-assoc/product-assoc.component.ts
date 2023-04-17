@@ -40,6 +40,8 @@ export class ProductAssocComponent {
   }
 
   @ViewChild('productInput') productAssocField!: ElementRef;
+  @ViewChild('definition') productAssocDefinition!: ElementRef;
+
   productAssocFieldDelta = false;
 
   separatorKeysCodes: number[] = [ENTER, COMMA, SPACE];
@@ -53,6 +55,8 @@ export class ProductAssocComponent {
   selectedMeaning: number | null = null;
   selectedDefOutput: IMeaning | null = null;
 
+  selectedAssocProduct: IProduct | null = null;
+
   productAssocForm = this._formBuilder.group({
     lex: new FormControl('', Validators.required),
   });
@@ -61,7 +65,7 @@ export class ProductAssocComponent {
   // Init the form when starting the view.
   ngOnInit(): void {
     this.productService.inventory.subscribe((productList: IProduct[] | any | []) => this.setInventory(productList));
-    this.productService.selected.subscribe((product: IProduct | any) => this.activateProduct(product));
+    //this.productService.selected.subscribe((product: IProduct | any) => this.activateProduct(product));
     this.productAssocForm.controls['lex'].valueChanges.subscribe((value: string | any | []) => this.readInput(value));
 
     console.log('coms_state', this.coms.state());
@@ -75,11 +79,17 @@ export class ProductAssocComponent {
   }
 
   activateProduct(product: IProduct | any):void {
+
+    this.selectedAssocProduct = product;
+
+    console.log(this.productAssocDefinition);
+
     if(product!==null && this.selectedDefinition !== null && this.selectedMeaning !== null){
+      
       
 
       this.selectedDefOutput = product.def[this.selectedDefinition].meanings[this.selectedMeaning];
-      console.log('selectedDefOutput', this.selectedDefOutput);
+      // console.log('selectedDefOutput', this.selectedDefOutput);
       // this.selectedDefinition = def;//product.relative_meta[def]['id'];
       // this.selectedMeaning = cond;//track['id'];
 
@@ -221,7 +231,7 @@ export class ProductAssocComponent {
     field.selectionStart = product.char_index;
     field.selectionEnd = field.selectionStart+product.product.length+1;
 
-    console.log(product);
+    // console.log(product);
   }
 
   dropProductCard(event: CdkDragDrop<productAssoc[]> | any) {
@@ -320,6 +330,8 @@ export class ProductAssocComponent {
 
     }
     
+    this.selectedAssocProduct = product.relative;
+
     console.log(event, product.brand);
 
 

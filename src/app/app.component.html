@@ -6,13 +6,21 @@
 <!-- * * * * * * * * * Delete the template below * * * * * * * * * * -->
 <!-- * * * * * * * to get started with your project! * * * * * * * * -->
 <!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
-<app-product-assoc></app-product-assoc>
-<!-- <app-product-traverse></app-product-traverse> -->
-<app-product-create></app-product-create>
-<app-product-coms></app-product-coms>
-<app-product-define #productDefineComponent></app-product-define>
-<app-product-list></app-product-list>
+<section>
+    <app-product-assoc></app-product-assoc>
+    <!-- <app-product-traverse></app-product-traverse> -->
+    <app-product-create></app-product-create>
+    <app-product-coms></app-product-coms>
 
+    <!-- <div #productDefineComponentBasePosition>
+        <div #productDefineComponent>
+            
+            <app-product-define></app-product-define>
+        </div>
+    </div> -->
+    <!-- (selectedProduct)="doSelect($event)" -->
+    <app-product-list></app-product-list>
+</section>
 <!-- <div class="app-message-container mat-elevation-z4">
     <mat-card>The server says it's {{ message }}</mat-card>
 </div> -->

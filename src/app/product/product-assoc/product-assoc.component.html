@@ -1,98 +1,98 @@
-<section>
-    <div class="create-form-container mat-elevation-z4">
 
-        <form [formGroup]="productAssocForm">
-            <mat-form-field appearance="fill" class="editor-field-full-width" >
-                <mat-label>Choose Word</mat-label>
-                <input type="text"
-                
-                matInput
-                #productInput 
-                formControlName="lex"
-                (click)="handleInput($event)" 
-                (keyup)="handleInput($event)"
-                (keyup.enter)="handleInput($event)">
-                <button type="button" matSuffix mat-icon-button aria-label="Clear" (click)="productInput.value=''; handleInput($event);">
-                    <mat-icon>close</mat-icon>
-                </button>
-                <mat-hint align="start">POS:<strong>{{output.pos}}</strong>&nbsp;{{output.product}}&nbsp;[{{output.phrase}}]</mat-hint>
-                <mat-hint align="end">{{output.phrase.length}} / 256</mat-hint>
-            </mat-form-field>
+<!-- <div class="create-form-container mat-elevation-z4"> -->
+<mat-card>
+    <form [formGroup]="productAssocForm">
+        <mat-form-field appearance="fill" class="editor-field-full-width" >
+            <mat-label>Choose Word</mat-label>
+            <input type="text"
+            
+            matInput
+            #productInput 
+            formControlName="lex"
+            (click)="handleInput($event)" 
+            (keyup)="handleInput($event)"
+            (keyup.enter)="handleInput($event)">
+            <button type="button" matSuffix mat-icon-button aria-label="Clear" (click)="productInput.value=''; handleInput($event);">
+                <mat-icon>close</mat-icon>
+            </button>
+            <mat-hint align="start">POS:<strong>{{output.pos}}</strong>&nbsp;{{output.product}}&nbsp;[{{output.phrase}}]</mat-hint>
+            <mat-hint align="end">{{output.phrase.length}} / 256</mat-hint>
+        </mat-form-field>
 
-        
-        <!-- <div>{{output.lex}}</div>
-        <div>{{output.info}}</div>
-        <div>{{output.auto}}</div> -->
+    
+    <!-- <div>{{output.lex}}</div>
+    <div>{{output.info}}</div>
+    <div>{{output.auto}}</div> -->
 
-            <div class="deck"
-                cdkDropList 
-                cdkDropListOrientation="horizontal" 
-                [cdkDropListData]="associations"
-                (cdkDropListDropped)="dropProductCard($event)">
-                <mat-card cdkDrag *ngFor="let product of associations" 
-                    (click)="handleProductCardSelect($event, product); $event.stopPropagation();" 
-                    [cdkDragPreviewContainer]="'parent'"
-                    [class]="(product.k_hot === true ? 'hot ' : '')+
-                    (product.relative !== null ? 'valid ' : '')+
-                    (product.selected ? 'card-selected ' : '')+
-                    'mat-elevation-z2 card'">
-                    <div class="card-left">
-                        <span>{{ product.index }}</span>
-                        <span>{{ product.char_index }}</span>
-                        <button type="button" mat-icon-button (click)="removeProductCard(product)" aria-label="Delete completely">
-                            <mat-icon>close</mat-icon>
-                        </button>
-                        <svg class="hot-marker" viewBox="0 0 32 32" >
-                            <polygon 
-                            [class]="(product.k_hot === true ? 'hot ' : '')+'svg-hexagon'"
-                            points="4.4,9.3 4.4,22.7 16,29.4 27.6,22.7 27.6,9.3 16,2.6 "/>
-                        </svg>
-                    </div>
-                    <div class="card-center">
-                        <div>{{ product.product }}</div>
-                        <div *ngIf="product.relative" class="card-defs">
-                            <mat-button-toggle-group
-                                id="{{def['id']}}"
-                                class="card-def"
-                                *ngFor="let def of product.relative_meta; let di=index;"
-                                [value]="product.brand">
-                                <button type="button" [class]="'card-button' + (selectedDefinition == def['id'] ? ' fired' : '') " mat-button aria-label="Delete completely">
-                                    {{di}}
-                                </button>
-                                <mat-button-toggle 
-                                    #kerf
-                                    *ngFor="let cond of def['v']; let mi=index;" 
-                                    (click)="updateProductCard($event, product, di, mi)"
-                                    
-                                    value="{{cond.id}}">
-                                    {{cond['v'][0]}}
-                                </mat-button-toggle>
-                            
-                            </mat-button-toggle-group>
-                        </div>
-                    </div>
-                    <div class="card-right"><span *ngIf="product.selected"></span></div>
-                </mat-card>
-                <div><button type="button" mat-icon-button class="delete" aria-label="Add Definition" (click)="handleAddPhrase($event)">
-                    <mat-icon color="primary">add</mat-icon>
-                </button></div>
-            </div>
-            <!-- [value]="product.brand"
-                [checked]="posel.value == product.brand"
-                 #posgroup="matButtonToggleGroup"
-                                    (di+'-'+mi+'-'+cond['v'][0])"
-                                [value]="product.brand"
-                                    
-                                    buttonToggleGroup="posgroup"
-                [stat]="[def['id'], cond['id'], cond['v'][0]]"
-            [stat]="['any']" -->
-        </form>
-        <mat-card>
-            <div class="assoc-defs" *ngIf="selectedDefOutput">
-                <div class="def has-edit" *ngFor="let i = index; let definitions of selectedDefOutput.definitions" KCond>
-                    {{definitions.definition}}
+        <div class="deck"
+            cdkDropList 
+            cdkDropListOrientation="horizontal" 
+            [cdkDropListData]="associations"
+            (cdkDropListDropped)="dropProductCard($event)">
+            <mat-card cdkDrag *ngFor="let product of associations" 
+                (click)="handleProductCardSelect($event, product); $event.stopPropagation();" 
+                [cdkDragPreviewContainer]="'parent'"
+                [class]="(product.k_hot === true ? 'hot ' : '')+
+                (product.relative !== null ? 'valid ' : '')+
+                (product.selected ? 'card-selected ' : '')+
+                'mat-elevation-z2 card'">
+                <div class="card-left">
+                    <span>{{ product.index }}</span>
+                    <span>{{ product.char_index }}</span>
+                    <button type="button" mat-icon-button (click)="removeProductCard(product)" aria-label="Delete completely">
+                        <mat-icon>close</mat-icon>
+                    </button>
+                    <svg class="hot-marker" viewBox="0 0 32 32" >
+                        <polygon 
+                        [class]="(product.k_hot === true ? 'hot ' : '')+'svg-hexagon'"
+                        points="4.4,9.3 4.4,22.7 16,29.4 27.6,22.7 27.6,9.3 16,2.6 "/>
+                    </svg>
                 </div>
+                <div class="card-center">
+                    <div>{{ product.product }}</div>
+                    <div *ngIf="product.relative" class="card-defs">
+                        <mat-button-toggle-group
+                            id="{{def['id']}}"
+                            class="card-def"
+                            *ngFor="let def of product.relative_meta; let di=index;"
+                            [value]="product.brand">
+                            <button type="button" [class]="'card-button' + (selectedDefinition == def['id'] ? ' fired' : '') " mat-button aria-label="Delete completely">
+                                {{di+1}}
+                            </button>
+                            <mat-button-toggle 
+                                #kerf
+                                *ngFor="let cond of def['v']; let mi=index;" 
+                                (click)="updateProductCard($event, product, di, mi)"
+                                
+                                value="{{cond.id}}">
+                                {{cond['v'][0]}}
+                            </mat-button-toggle>
+                        
+                        </mat-button-toggle-group>
+                    </div>
+                </div>
+                <div class="card-right"><span *ngIf="product.selected"></span></div>
+            </mat-card>
+            <div><button type="button" mat-icon-button class="delete" aria-label="Add Definition" (click)="handleAddPhrase($event)">
+                <mat-icon color="primary">add</mat-icon>
+            </button></div>
+        </div>
+        <!-- [value]="product.brand"
+            [checked]="posel.value == product.brand"
+                #posgroup="matButtonToggleGroup"
+                                (di+'-'+mi+'-'+cond['v'][0])"
+                            [value]="product.brand"
+                                
+                                buttonToggleGroup="posgroup"
+            [stat]="[def['id'], cond['id'], cond['v'][0]]"
+        [stat]="['any']" -->
+    </form>
+    <mat-card>
+        <div #definition class="productDefineArea" [appLoader]="selectedAssocProduct"></div>
+        <div class="assoc-defs" *ngIf="selectedDefOutput">
+            <div class="def has-edit" *ngFor="let i = index; let definitions of selectedDefOutput.definitions" KCond>
+                {{definitions.definition}}
             </div>
-        </mat-card>
-    </div>
-</section>
+        </div>
+    </mat-card>
+</mat-card>
