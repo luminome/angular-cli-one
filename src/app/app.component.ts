@@ -16,10 +16,13 @@ export class AppComponent implements OnInit {
 
   // createdProduct: IProduct | any = null;
   // selectedProduct: IProduct | any = null;
-
+  // @ViewChild('productDefineComponent',{static:false}) private productDefineComponent!: ElementRef<HTMLElement>;
+  // @ViewChild('productDefineComponentBasePosition',{static:false}) private pdc_position!: ElementRef<HTMLElement>;
+  
   constructor(protected statusService: StatusService, protected text: TextService) { }
 
-  @ViewChild('productDefineComponent') productDefineComponent!: ElementRef;
+  //@ViewChild('parent',{static:false}) parentDiv:ElementRef
+  
   // @ViewChild(MatSort, {static: true}) 'sort': MatSort;
 
   // Get the server status when starting the view.
@@ -32,6 +35,16 @@ export class AppComponent implements OnInit {
         this.text.ez.set_text("status:\n"+JSON.stringify(result, null, '\t'), true);
       });
   }
+
+  // doSelect(createdProduct: HTMLElement | null) {
+  //   if(createdProduct !== null){
+  //     const target = createdProduct.querySelector('div.productDefineArea');
+  //     target?.appendChild(this.productDefineComponent.nativeElement);
+  //   }else{
+  //     console.log("APP deselect");
+  //     this.pdc_position.nativeElement.appendChild(this.productDefineComponent.nativeElement);
+  //   }
+  // }
 
   // // Get the new product created.
   // onCreatedProduct(createdProduct: IProduct) {
